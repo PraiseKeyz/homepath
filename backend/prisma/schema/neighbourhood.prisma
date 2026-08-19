@@ -1,0 +1,26 @@
+model LandlordRating {
+  id         String   @id @default(cuid())
+  landlordId String
+  landlord   User     @relation("RatingTarget", fields: [landlordId], references: [id], onDelete: Cascade)
+  raterId    String
+  rater      User     @relation("RatingAuthor", fields: [raterId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@index([landlordId])
+}
+
+// floodRiskScore / powerScore / securityScore are seeded demo values, not live
+// sensor/satellite data — see docs/ARCHITECTURE.md §5. placesCache/commuteCache
+// hold real Google Places/Maps API responses.
+model NeighbourhoodData {
+  id             String   @id @default(cuid())
+  areaKey        String   @unique
+  floodRiskScore Int
+  powerScore     Int
+  securityScore  Int
+  placesCache    Json?
+  commuteCache   Json?
+  updatedAt      DateTime @updatedAt
+}

@@ -1,0 +1,358 @@
+@import "tailwindcss";
+@import "./design-tokens-light.css";
+@import "./design-tokens-dark.css";
+
+/* ==========================================================================
+   FONTS – Satoshi (public/fonts/)
+   ========================================================================== */
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ==========================================================================
+   HOMEPATH DESIGN SYSTEM – Colors (trust-blue palette)
+   Short names: e.g. --color-text-primary-900. Use: bg-button-primary-default, text-text-primary-900
+   Light colors: design-tokens-light.css. Dark colors: design-tokens-dark.css (apply [data-theme="dark"] to enable).
+   ========================================================================== */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-sans);
+
+  --color-color: var(--color-color);
+  --color-color-2: var(--color-color-2);
+  --color-color-3: var(--color-color-3);
+  --color-foreground-fg: var(--color-foreground-fg);
+  --color-foreground-fg-primary-900: var(--color-foreground-fg-primary-900);
+  --color-foreground-fg-secondary-700: var(--color-foreground-fg-secondary-700);
+  --color-foreground-fg-secondary-hover: var(
+    --color-foreground-fg-secondary-hover
+  );
+  --color-foreground-fg-tertiary-600: var(--color-foreground-fg-tertiary-600);
+  --color-foreground-fg-tertiary-hover: var(
+    --color-foreground-fg-tertiary-hover
+  );
+  --color-foreground-fg-quaternary-400: var(
+    --color-foreground-fg-quaternary-400
+  );
+  --color-foreground-fg-quaternary-hover: var(
+    --color-foreground-fg-quaternary-hover
+  );
+  --color-foreground-fg-white: var(--color-foreground-fg-white);
+  --color-foreground-fg-disabled: var(--color-foreground-fg-disabled);
+  --color-foreground-fg-disabled-subtle: var(
+    --color-foreground-fg-disabled-subtle
+  );
+  --color-foreground-fg-brand-primary-600: var(
+    --color-foreground-fg-brand-primary-600
+  );
+  --color-foreground-fg-brand-primary-alt: var(
+    --color-foreground-fg-brand-primary-alt
+  );
+  --color-foreground-fg-brand-secondary-500: var(
+    --color-foreground-fg-brand-secondary-500
+  );
+  --color-foreground-fg-brand-secondary-alt: var(
+    --color-foreground-fg-brand-secondary-alt
+  );
+  --color-foreground-fg-brand-secondary-hover: var(
+    --color-foreground-fg-brand-secondary-hover
+  );
+  --color-foreground-fg-error-primary: var(--color-foreground-fg-error-primary);
+  --color-foreground-fg-error-secondary: var(
+    --color-foreground-fg-error-secondary
+  );
+  --color-foreground-fg-warning-primary: var(
+    --color-foreground-fg-warning-primary
+  );
+  --color-foreground-fg-warning-secondary: var(
+    --color-foreground-fg-warning-secondary
+  );
+  --color-foreground-fg-success-primary: var(
+    --color-foreground-fg-success-primary
+  );
+  --color-foreground-fg-success-secondary: var(
+    --color-foreground-fg-success-secondary
+  );
+  --color-text-primary-900: var(--color-text-primary-900);
+  --color-text-primary-on-brand: var(--color-text-primary-on-brand);
+  --color-text-secondary-700: var(--color-text-secondary-700);
+  --color-text-secondary-hover: var(--color-text-secondary-hover);
+  --color-text-secondary-on-brand: var(--color-text-secondary-on-brand);
+  --color-text-tertiary-600: var(--color-text-tertiary-600);
+  --color-text-tertiary-hover: var(--color-text-tertiary-hover);
+  --color-text-tertiary-on-brand: var(--color-text-tertiary-on-brand);
+  --color-text-quaternary-500: var(--color-text-quaternary-500);
+  --color-text-quaternary-on-brand: var(--color-text-quaternary-on-brand);
+  --color-text-white: var(--color-text-white);
+  --color-text-disabled: var(--color-text-disabled);
+  --color-text-placeholder: var(--color-text-placeholder);
+  --color-text-placeholder-subtle: var(--color-text-placeholder-subtle);
+  --color-text-brand-primary-900: var(--color-text-brand-primary-900);
+  --color-text-brand-secondary-700: var(--color-text-brand-secondary-700);
+  --color-text-brand-secondary-hover: var(--color-text-brand-secondary-hover);
+  --color-text-brand-tertiary-600: var(--color-text-brand-tertiary-600);
+  --color-text-brand-tertiary-alt: var(--color-text-brand-tertiary-alt);
+  --color-text-error-primary-600: var(--color-text-error-primary-600);
+  --color-text-error-primary-hover: var(--color-text-error-primary-hover);
+  --color-text-warning-primary-600: var(--color-text-warning-primary-600);
+  --color-text-success-primary-600: var(--color-text-success-primary-600);
+  --color-border-primary: var(--color-border-primary);
+  --color-border-secondary: var(--color-border-secondary);
+  --color-border-secondary-alt: var(--color-border-secondary-alt);
+  --color-border-tertiary: var(--color-border-tertiary);
+  --color-border-disabled: var(--color-border-disabled);
+  --color-border-disabled-subtle: var(--color-border-disabled-subtle);
+  --color-border-brand: var(--color-border-brand);
+  --color-border-brand-alt: var(--color-border-brand-alt);
+  --color-border-error: var(--color-border-error);
+  --color-border-error-subtle: var(--color-border-error-subtle);
+  --color-button-primary-default: var(--color-button-primary-default);
+  --color-button-primary-hover: var(--color-button-primary-hover);
+  --color-button-primary-focused: var(--color-button-primary-focused);
+  --color-background-bg-primary: var(--color-background-bg-primary);
+  --color-background-bg-primary-alt: var(--color-background-bg-primary-alt);
+  --color-background-bg-primary-hover: var(--color-background-bg-primary-hover);
+  --color-background-bg-primary-solid: var(--color-background-bg-primary-solid);
+  --color-background-bg-secondary: var(--color-background-bg-secondary);
+  --color-background-bg-secondary-alt: var(--color-background-bg-secondary-alt);
+  --color-background-bg-secondary-hover: var(
+    --color-background-bg-secondary-hover
+  );
+  --color-background-bg-secondary-subtle: var(
+    --color-background-bg-secondary-subtle
+  );
+  --color-background-bg-secondary-solid: var(
+    --color-background-bg-secondary-solid
+  );
+  --color-background-bg-tertiary: var(--color-background-bg-tertiary);
+  --color-background-bg-quaternary: var(--color-background-bg-quaternary);
+  --color-background-bg-active: var(--color-background-bg-active);
+  --color-background-bg-disabled: var(--color-background-bg-disabled);
+  --color-background-bg-disabled-subtle: var(
+    --color-background-bg-disabled-subtle
+  );
+  --color-background-bg-overlay: var(--color-background-bg-overlay);
+  --color-background-bg-brand-primary: var(--color-background-bg-brand-primary);
+  --color-background-bg-brand-primary-alt: var(
+    --color-background-bg-brand-primary-alt
+  );
+  --color-background-bg-brand-secondary: var(
+    --color-background-bg-brand-secondary
+  );
+  --color-background-bg-brand-solid: var(--color-background-bg-brand-solid);
+  --color-background-bg-brand-solid-hover: var(
+    --color-background-bg-brand-solid-hover
+  );
+  --color-background-bg-brand-section: var(--color-background-bg-brand-section);
+  --color-background-bg-brand-section-subtle: var(
+    --color-background-bg-brand-section-subtle
+  );
+  --color-background-bg-error-primary: var(--color-background-bg-error-primary);
+  --color-background-bg-error-secondary: var(
+    --color-background-bg-error-secondary
+  );
+  --color-background-bg-error-solid: var(--color-background-bg-error-solid);
+  --color-background-bg-error-solid-hover: var(
+    --color-background-bg-error-solid-hover
+  );
+  --color-background-bg-warning-primary: var(
+    --color-background-bg-warning-primary
+  );
+  --color-background-bg-warning-secondary: var(
+    --color-background-bg-warning-secondary
+  );
+  --color-background-bg-warning-solid: var(--color-background-bg-warning-solid);
+  --color-background-bg-success-primary: var(
+    --color-background-bg-success-primary
+  );
+  --color-background-bg-success-secondary: var(
+    --color-background-bg-success-secondary
+  );
+  --color-background-bg-success-solid: var(--color-background-bg-success-solid);
+  --color-effects-focus-rings-focus-ring: var(
+    --color-effects-focus-rings-focus-ring
+  );
+  --color-effects-focus-rings-focus-ring-error: var(
+    --color-effects-focus-rings-focus-ring-error
+  );
+  --color-effects-shadows-shadow-xs: var(--color-effects-shadows-shadow-xs);
+  --color-effects-shadows-shadow-sm-01: var(
+    --color-effects-shadows-shadow-sm-01
+  );
+  --color-effects-shadows-shadow-sm-02: var(
+    --color-effects-shadows-shadow-sm-02
+  );
+  --color-effects-shadows-shadow-md-01: var(
+    --color-effects-shadows-shadow-md-01
+  );
+  --color-effects-shadows-shadow-md-02: var(
+    --color-effects-shadows-shadow-md-02
+  );
+  --color-effects-shadows-shadow-lg-01: var(
+    --color-effects-shadows-shadow-lg-01
+  );
+  --color-effects-shadows-shadow-lg-02: var(
+    --color-effects-shadows-shadow-lg-02
+  );
+  --color-effects-shadows-shadow-lg-03: var(
+    --color-effects-shadows-shadow-lg-03
+  );
+  --color-effects-shadows-shadow-xl-01: var(
+    --color-effects-shadows-shadow-xl-01
+  );
+  --color-effects-shadows-shadow-xl-02: var(
+    --color-effects-shadows-shadow-xl-02
+  );
+  --color-effects-shadows-shadow-xl-03: var(
+    --color-effects-shadows-shadow-xl-03
+  );
+  --color-effects-shadows-shadow-2xl-01: var(
+    --color-effects-shadows-shadow-2xl-01
+  );
+  --color-effects-shadows-shadow-2xl-02: var(
+    --color-effects-shadows-shadow-2xl-02
+  );
+  --color-effects-shadows-shadow-3xl-01: var(
+    --color-effects-shadows-shadow-3xl-01
+  );
+  --color-effects-shadows-shadow-3xl-02: var(
+    --color-effects-shadows-shadow-3xl-02
+  );
+  --color-utility-gray-50: var(--color-utility-gray-50);
+  --color-utility-gray-100: var(--color-utility-gray-100);
+  --color-utility-gray-200: var(--color-utility-gray-200);
+  --color-utility-gray-300: var(--color-utility-gray-300);
+  --color-utility-gray-400: var(--color-utility-gray-400);
+  --color-utility-gray-500: var(--color-utility-gray-500);
+  --color-utility-gray-600: var(--color-utility-gray-600);
+  --color-utility-gray-700: var(--color-utility-gray-700);
+  --color-utility-gray-800: var(--color-utility-gray-800);
+  --color-utility-gray-900: var(--color-utility-gray-900);
+
+  --color-utility-brand-50: var(--color-utility-brand-50);
+  --color-utility-brand-100: var(--color-utility-brand-100);
+  --color-utility-brand-200: var(--color-utility-brand-200);
+  --color-utility-brand-300: var(--color-utility-brand-300);
+  --color-utility-brand-400: var(--color-utility-brand-400);
+  --color-utility-brand-500: var(--color-utility-brand-500);
+  --color-utility-brand-600: var(--color-utility-brand-600);
+  --color-utility-brand-700: var(--color-utility-brand-700);
+  --color-utility-brand-800: var(--color-utility-brand-800);
+  --color-utility-brand-900: var(--color-utility-brand-900);
+
+  --color-utility-error-50: var(--color-utility-error-50);
+  --color-utility-error-100: var(--color-utility-error-100);
+  --color-utility-error-500: var(--color-utility-error-500);
+  --color-utility-error-600: var(--color-utility-error-600);
+  --color-utility-error-700: var(--color-utility-error-700);
+
+  --color-utility-warning-50: var(--color-utility-warning-50);
+  --color-utility-warning-100: var(--color-utility-warning-100);
+  --color-utility-warning-500: var(--color-utility-warning-500);
+  --color-utility-warning-600: var(--color-utility-warning-600);
+  --color-utility-warning-700: var(--color-utility-warning-700);
+
+  --color-utility-success-50: var(--color-utility-success-50);
+  --color-utility-success-100: var(--color-utility-success-100);
+  --color-utility-success-500: var(--color-utility-success-500);
+  --color-utility-success-600: var(--color-utility-success-600);
+  --color-utility-success-700: var(--color-utility-success-700);
+
+  --shadow-effects-shadows-shadow-xs: 0 1px 2px 0
+    var(--color-effects-shadows-shadow-xs);
+  --shadow-effects-shadows-shadow-sm:
+    0 1px 3px 0 var(--color-effects-shadows-shadow-sm-01),
+    0 1px 2px -1px var(--color-effects-shadows-shadow-sm-02);
+  --shadow-effects-shadows-shadow-md:
+    0 4px 6px -1px var(--color-effects-shadows-shadow-md-01),
+    0 2px 4px -2px var(--color-effects-shadows-shadow-md-02);
+  --shadow-effects-shadows-shadow-lg:
+    0 12px 16px -4px var(--color-effects-shadows-shadow-lg-01),
+    0 4px 6px -2px var(--color-effects-shadows-shadow-lg-02),
+    0 2px 2px -1px var(--color-effects-shadows-shadow-lg-03);
+  --shadow-effects-shadows-shadow-xl:
+    0 20px 24px -4px var(--color-effects-shadows-shadow-xl-01),
+    0 8px 8px -4px var(--color-effects-shadows-shadow-xl-02),
+    0 4px 4px -2px var(--color-effects-shadows-shadow-xl-03);
+}
+
+/* Hide scrollbar but keep element scrollable */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Subtle dot grid for map/canvas-style surfaces */
+.bg-dotted-grid {
+  background-color: var(--color-background-bg-secondary-subtle);
+  background-image: radial-gradient(
+    circle,
+    var(--color-border-secondary) 1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+}
+
+/* Elevated dropdown / search suggestion panel */
+.shadow-dropdown-panel {
+  box-shadow:
+    0 0 0 1px var(--color-border-secondary),
+    0 4px 6px -2px var(--color-effects-shadows-shadow-md-01),
+    0 12px 16px -4px var(--color-effects-shadows-shadow-lg-01),
+    0 20px 24px -4px var(--color-effects-shadows-shadow-xl-01);
+}
+
+/* Default is light theme (white bg, dark text). Apply [data-theme="dark"] on
+   html to opt into dark mode. */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}

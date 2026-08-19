@@ -1,0 +1,54 @@
+model Cooperative {
+  id                 String   @id @default(cuid())
+  name               String
+  targetAreaKey      String
+  targetPropertyType String
+  createdAt          DateTime @default(now())
+
+  memberships      CooperativeMembership[]
+  rentToOwnMatches RentToOwnMatch[]
+
+  @@index([targetAreaKey])
+}
+
+model CooperativeMembership {
+  id                        String      @id @default(cuid())
+  cooperativeId             String
+  cooperative               Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  userId                    String
+  user                      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  monthlyContributionAmount Decimal     @db.Decimal(12, 2)
+  joinedAt                  DateTime    @default(now())
+
+  contributions Contribution[]
+
+  @@unique([cooperativeId, userId])
+}
+
+// Seeded/generated history for the demo — see docs/ARCHITECTURE.md §5.
+model Contribution {
+  id           String                 @id @default(cuid())
+  membershipId String
+  membership   CooperativeMembership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  amount       Decimal                @db.Decimal(12, 2)
+  month        DateTime
+  createdAt    DateTime               @default(now())
+
+  @@index([membershipId])
+}
+
+enum RentToOwnStatus {
+  PROPOSED
+  ACCEPTED
+  DECLINED
+}
+
+model RentToOwnMatch {
+  id            String          @id @default(cuid())
+  cooperativeId String
+  cooperative   Cooperative     @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  propertyId    String
+  property      Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  status        RentToOwnStatus @default(PROPOSED)
+  matchedAt     DateTime        @default(now())
+}

@@ -1,0 +1,71 @@
+// See docs/ARCHITECTURE.md §2 — the Trust Score is a deterministic composite of
+// RegistryRecord + CommunityReport signals. AI (see AiExplanationService) only
+// narrates the already-computed result; it never determines the score itself.
+// PropertyDocument fields are self-attested by the submitting user, never
+// parsed from the photo — see §2 "pure self-attestation".
+
+model PropertyDocument {
+  id                String   @id @default(cuid())
+  propertyId        String   @unique
+  property          Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  submittedById     String
+  submittedBy       User     @relation("DocumentSubmitter", fields: [submittedById], references: [id])
+  plotNumber        String
+  surveyNumber      String
+  attestedOwnerName String
+  documentType      String
+  photoUrl          String?
+  createdAt         DateTime @default(now())
+
+  @@index([plotNumber])
+  @@index([surveyNumber])
+}
+
+enum RegistryStatus {
+  CLEAN
+  FLAGGED
+  DISPUTED
+}
+
+// Seeded demo dataset standing in for a real land-registry / EFCC / court-records
+// integration — see docs/ARCHITECTURE.md §2.1.
+model RegistryRecord {
+  id           String         @id @default(cuid())
+  plotNumber   String
+  surveyNumber String
+  status       RegistryStatus
+  notes        String?
+  createdAt    DateTime       @default(now())
+
+  @@unique([plotNumber, surveyNumber])
+}
+
+enum CommunityReportType {
+  CONFIRMATION
+  DISPUTE
+  FRAUD_FLAG
+}
+
+model CommunityReport {
+  id          String              @id @default(cuid())
+  propertyId  String
+  property    Property            @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  reporterId  String
+  reporter    User                @relation("ReportAuthor", fields: [reporterId], references: [id])
+  type        CommunityReportType
+  description String?
+  createdAt   DateTime            @default(now())
+
+  @@index([propertyId])
+}
+
+model TrustScore {
+  id                  String   @id @default(cuid())
+  propertyId          String   @unique
+  property            Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  score               Int
+  registryStatus      String
+  communityAdjustment Int
+  explanationText     String   @db.Text
+  computedAt          DateTime @default(now())
+}
