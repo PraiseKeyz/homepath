@@ -43,8 +43,7 @@ pnpm prisma:seed
 pnpm start:dev
 ```
 
-Backend runs at [http://localhost:3001/api/v1](http://localhost:3001/api/v1). Swagger docs at
-[http://localhost:3001/api/docs](http://localhost:3001/api/docs).
+Backend runs at [http://localhost:3001/api/v1](http://localhost:3001/api/v1).
 
 ### Run the frontend
 

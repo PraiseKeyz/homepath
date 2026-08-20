@@ -31,7 +31,6 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/swagger": "^11.1.0",
     "@prisma/client": "^6.0.0",
     "@anthropic-ai/sdk": "^0.117.1",
     "argon2": "^0.44.0",

@@ -1,0 +1,150 @@
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
+
+export type UserRole = "BUYER_RENTER" | "LANDLORD" | "DEVELOPER" | "AGENT";
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: UserRole;
+  createdAt: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  accessToken: string;
+}
+
+interface ApiEnvelope<T> {
+  success: boolean;
+  message: string;
+  data: T | null;
+}
+
+export class ApiError extends Error {
+  statusCode: number;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.name = "ApiError";
+    this.statusCode = statusCode;
+  }
+}
+
+async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+  const body: ApiEnvelope<T> = await res.json();
+
+  if (!res.ok || !body.success) {
+    throw new ApiError(body.message ?? "Something went wrong", res.status);
+  }
+
+  return body.data as T;
+}
+
+export function login(input: { email: string; password: string }) {
+  return apiFetch<AuthResponse>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function register(input: {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  role: UserRole;
+}) {
+  return apiFetch<AuthResponse>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export type PropertyListingType = "SALE" | "RENT";
+export type PropertyStatus =
+  | "AVAILABLE"
+  | "UNDER_REVIEW"
+  | "MATCHED"
+  | "UNAVAILABLE";
+export type RegistryStatus = "CLEAN" | "FLAGGED" | "DISPUTED" | "NOT_FOUND";
+export type CommunityReportType = "CONFIRMATION" | "DISPUTE" | "FRAUD_FLAG";
+
+export interface TrustScore {
+  id: string;
+  propertyId: string;
+  score: number;
+  registryStatus: RegistryStatus;
+  communityAdjustment: number;
+  explanationText: string;
+  computedAt: string;
+}
+
+// Prisma's Decimal fields serialize to strings over JSON, not numbers.
+export interface Property {
+  id: string;
+  ownerId: string;
+  title: string;
+  listingType: PropertyListingType;
+  price: string;
+  bedrooms: number;
+  address: string;
+  lat: number;
+  lng: number;
+  areaKey: string;
+  status: PropertyStatus;
+  createdAt: string;
+  updatedAt: string;
+  trustScore?: TrustScore | null;
+}
+
+export interface PropertyDocument {
+  id: string;
+  propertyId: string;
+  plotNumber: string;
+  surveyNumber: string;
+  attestedOwnerName: string;
+  documentType: string;
+  photoUrl: string | null;
+}
+
+export interface CommunityReport {
+  id: string;
+  propertyId: string;
+  reporterId: string;
+  type: CommunityReportType;
+  description: string | null;
+  createdAt: string;
+}
+
+export interface PropertyDetail extends Property {
+  document: PropertyDocument | null;
+  communityReports: CommunityReport[];
+}
+
+export function fetchProperties() {
+  return apiFetch<Property[]>("/properties");
+}
+
+export function fetchProperty(id: string) {
+  return apiFetch<PropertyDetail>(`/properties/${id}`);
+}
+
+export function computeTrustScore(propertyId: string) {
+  return apiFetch<TrustScore>(`/properties/${propertyId}/trust-score`, {
+    method: "POST",
+  });
+}

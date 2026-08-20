@@ -1,7 +1,8 @@
-/* Light mode – HomePath "trust blue" palette. Same token structure/naming as
-   the battalion-hrms design system, brand hue swapped from magenta to blue
-   (see docs/ARCHITECTURE.md). All non-brand tokens (gray/error/warning/success/
-   utility scales) are unchanged. */
+/* Light mode – HomePath "deep violet" palette. Same token structure/naming as
+   the battalion-hrms design system, brand hue swapped to violet (see
+   docs/ARCHITECTURE.md). Kept distinct from the Trust Score's green/yellow/red
+   bands. All non-brand tokens (gray/error/warning/success/utility scales) are
+   unchanged. */
 :root {
   --background: var(--color-background-bg-primary);
   --foreground: var(--color-foreground-fg);
@@ -13,21 +14,21 @@
   --color-text-primary-on-brand: #ffffff;
   --color-text-secondary-700: #414651;
   --color-text-secondary-hover: #252b37;
-  --color-text-secondary-on-brand: #bfdbfe;
+  --color-text-secondary-on-brand: #ddd6fe;
   --color-text-tertiary-600: #535862;
   --color-text-tertiary-hover: #414651;
-  --color-text-tertiary-on-brand: #bfdbfe;
+  --color-text-tertiary-on-brand: #ddd6fe;
   --color-text-quaternary-500: #717680;
-  --color-text-quaternary-on-brand: #93c5fd;
+  --color-text-quaternary-on-brand: #c4b5fd;
   --color-text-white: #ffffff;
   --color-text-disabled: #717680;
   --color-text-placeholder: #717680;
   --color-text-placeholder-subtle: #d5d7da;
-  --color-text-brand-primary-900: #1e3a8a;
-  --color-text-brand-secondary-700: #1d4ed8;
-  --color-text-brand-secondary-hover: #1e40af;
-  --color-text-brand-tertiary-600: #2563eb;
-  --color-text-brand-tertiary-alt: #2563eb;
+  --color-text-brand-primary-900: #4c1d95;
+  --color-text-brand-secondary-700: #6d28d9;
+  --color-text-brand-secondary-hover: #5b21b6;
+  --color-text-brand-tertiary-600: #7c3aed;
+  --color-text-brand-tertiary-alt: #7c3aed;
   --color-text-error-primary-600: #d92d20;
   --color-text-error-primary-hover: #b42318;
   --color-text-warning-primary-600: #dc6803;
@@ -38,8 +39,8 @@
   --color-border-tertiary: #f5f5f5;
   --color-border-disabled: #d5d7da;
   --color-border-disabled-subtle: #e9eaeb;
-  --color-border-brand: #1e40af;
-  --color-border-brand-alt: #2563eb;
+  --color-border-brand: #5b21b6;
+  --color-border-brand-alt: #7c3aed;
   --color-border-error: #f04438;
   --color-border-error-subtle: #fda29b;
   --color-foreground-fg: #181d27;
@@ -53,20 +54,20 @@
   --color-foreground-fg-white: #ffffff;
   --color-foreground-fg-disabled: #a4a7ae;
   --color-foreground-fg-disabled-subtle: #d5d7da;
-  --color-foreground-fg-brand-primary-600: #2563eb;
-  --color-foreground-fg-brand-primary-alt: #2563eb;
-  --color-foreground-fg-brand-secondary-alt: #3b82f6;
-  --color-foreground-fg-brand-secondary-500: #3b82f6;
-  --color-foreground-fg-brand-secondary-hover: #2563eb;
+  --color-foreground-fg-brand-primary-600: #7c3aed;
+  --color-foreground-fg-brand-primary-alt: #7c3aed;
+  --color-foreground-fg-brand-secondary-alt: #8b5cf6;
+  --color-foreground-fg-brand-secondary-500: #8b5cf6;
+  --color-foreground-fg-brand-secondary-hover: #7c3aed;
   --color-foreground-fg-error-primary: #d92d20;
   --color-foreground-fg-error-secondary: #f04438;
   --color-foreground-fg-warning-primary: #dc6803;
   --color-foreground-fg-warning-secondary: #f79009;
   --color-foreground-fg-success-primary: #079455;
   --color-foreground-fg-success-secondary: #17b26a;
-  --color-button-primary-default: #1e40af;
-  --color-button-primary-hover: #1d4ed8;
-  --color-button-primary-focused: #1e40af;
+  --color-button-primary-default: #5b21b6;
+  --color-button-primary-hover: #6d28d9;
+  --color-button-primary-focused: #5b21b6;
   --color-background-bg-primary: #ffffff;
   --color-background-bg-primary-alt: #ffffff;
   --color-background-bg-primary-hover: #fafafa;
@@ -82,13 +83,13 @@
   --color-background-bg-disabled: #f5f5f5;
   --color-background-bg-disabled-subtle: #fafafa;
   --color-background-bg-overlay: #0a0d12;
-  --color-background-bg-brand-primary: #eff6ff;
-  --color-background-bg-brand-primary-alt: #eff6ff;
-  --color-background-bg-brand-secondary: #dbeafe;
-  --color-background-bg-brand-solid: #2563eb;
-  --color-background-bg-brand-solid-hover: #1d4ed8;
-  --color-background-bg-brand-section: #1e40af;
-  --color-background-bg-brand-section-subtle: #1d4ed8;
+  --color-background-bg-brand-primary: #f5f3ff;
+  --color-background-bg-brand-primary-alt: #f5f3ff;
+  --color-background-bg-brand-secondary: #ede9fe;
+  --color-background-bg-brand-solid: #7c3aed;
+  --color-background-bg-brand-solid-hover: #6d28d9;
+  --color-background-bg-brand-section: #5b21b6;
+  --color-background-bg-brand-section-subtle: #6d28d9;
   --color-background-bg-error-primary: #fef3f2;
   --color-background-bg-error-secondary: #fee4e2;
   --color-background-bg-error-solid: #d92d20;
@@ -99,7 +100,7 @@
   --color-background-bg-success-primary: #ecfdf3;
   --color-background-bg-success-secondary: #dcfae6;
   --color-background-bg-success-solid: #079455;
-  --color-effects-focus-rings-focus-ring: #1d4ed8;
+  --color-effects-focus-rings-focus-ring: #6d28d9;
   --color-effects-focus-rings-focus-ring-error: #f04438;
   --color-effects-shadows-shadow-xs: rgba(10, 13, 18, 0.1);
 
@@ -159,26 +160,26 @@
   --color-utility-gray-800: #252b37;
   --color-utility-gray-900: #181d27;
   --color-utility-dot-blue: #2e90fa;
-  --color-utility-brand-50: #eff6ff;
-  --color-utility-brand-50-alt: #eff6ff;
-  --color-utility-brand-100: #dbeafe;
-  --color-utility-brand-100-alt: #dbeafe;
-  --color-utility-brand-200: #bfdbfe;
-  --color-utility-brand-200-alt: #bfdbfe;
-  --color-utility-brand-300: #93c5fd;
-  --color-utility-brand-300-alt: #93c5fd;
-  --color-utility-brand-400: #60a5fa;
-  --color-utility-brand-400-alt: #60a5fa;
-  --color-utility-brand-500: #3b82f6;
-  --color-utility-brand-500-alt: #3b82f6;
-  --color-utility-brand-600: #2563eb;
-  --color-utility-brand-600-alt: #2563eb;
-  --color-utility-brand-700: #1d4ed8;
-  --color-utility-brand-700-alt: #1d4ed8;
-  --color-utility-brand-800: #1e40af;
-  --color-utility-brand-800-alt: #1e40af;
-  --color-utility-brand-900: #1e3a8a;
-  --color-utility-brand-900-alt: #1e3a8a;
+  --color-utility-brand-50: #f5f3ff;
+  --color-utility-brand-50-alt: #f5f3ff;
+  --color-utility-brand-100: #ede9fe;
+  --color-utility-brand-100-alt: #ede9fe;
+  --color-utility-brand-200: #ddd6fe;
+  --color-utility-brand-200-alt: #ddd6fe;
+  --color-utility-brand-300: #c4b5fd;
+  --color-utility-brand-300-alt: #c4b5fd;
+  --color-utility-brand-400: #a78bfa;
+  --color-utility-brand-400-alt: #a78bfa;
+  --color-utility-brand-500: #8b5cf6;
+  --color-utility-brand-500-alt: #8b5cf6;
+  --color-utility-brand-600: #7c3aed;
+  --color-utility-brand-600-alt: #7c3aed;
+  --color-utility-brand-700: #6d28d9;
+  --color-utility-brand-700-alt: #6d28d9;
+  --color-utility-brand-800: #5b21b6;
+  --color-utility-brand-800-alt: #5b21b6;
+  --color-utility-brand-900: #4c1d95;
+  --color-utility-brand-900-alt: #4c1d95;
   --color-utility-error-50: #fef3f2;
   --color-utility-error-100: #fee4e2;
   --color-utility-error-200: #fecdca;
@@ -301,22 +302,22 @@
   --color-utility-yellow-700: #a15c07;
   --color-component-colors-components-app-store-badges-app-store-badge-border: #a6a6a6;
   --color-component-colors-components-avatars-avatar-styles-bg-neutral: #e0e0e0;
-  --color-component-colors-components-buttons-button-primary-icon: #dbeafe;
-  --color-component-colors-components-buttons-button-primary-icon-hover: #bfdbfe;
+  --color-component-colors-components-buttons-button-primary-icon: #ede9fe;
+  --color-component-colors-components-buttons-button-primary-icon-hover: #ddd6fe;
   --color-component-colors-components-buttons-button-destructive-primary-icon: #fda29b;
   --color-component-colors-components-buttons-button-destructive-primary-icon-hover: #fecdca;
-  --color-component-colors-components-footers-footer-button-fg: #bfdbfe;
+  --color-component-colors-components-footers-footer-button-fg: #ddd6fe;
   --color-component-colors-components-footers-footer-button-fg-hover: #ffffff;
-  --color-component-colors-components-icons-icon-fg-brand: #2563eb;
-  --color-component-colors-components-icons-icon-fg-brand-on-brand: #bfdbfe;
-  --color-component-colors-components-icons-featured-icons-featured-icon-light-fg-brand: #2563eb;
+  --color-component-colors-components-icons-icon-fg-brand: #7c3aed;
+  --color-component-colors-components-icons-icon-fg-brand-on-brand: #ddd6fe;
+  --color-component-colors-components-icons-featured-icons-featured-icon-light-fg-brand: #7c3aed;
   --color-component-colors-components-icons-featured-icons-featured-icon-light-fg-gray: #717680;
   --color-component-colors-components-icons-featured-icons-featured-icon-light-fg-error: #d92d20;
   --color-component-colors-components-icons-featured-icons-featured-icon-light-fg-warning: #dc6803;
   --color-component-colors-components-icons-featured-icons-featured-icon-light-fg-success: #079455;
   --color-component-colors-components-mockups-screen-mockup-border: #181d27;
   --color-component-colors-components-sliders-slider-handle-bg: #ffffff;
-  --color-component-colors-components-sliders-slider-handle-border: #2563eb;
+  --color-component-colors-components-sliders-slider-handle-border: #7c3aed;
   --color-component-colors-components-toggles-toggle-button-fg-disabled: #fafafa;
   --color-component-colors-components-toggles-toggle-border: #d5d7da;
   --color-component-colors-components-tooltips-tooltip-supporting-text: #d5d7da;

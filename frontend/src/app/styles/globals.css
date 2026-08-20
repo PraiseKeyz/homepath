@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "./design-tokens-light.css";
-@import "./design-tokens-dark.css";
 
 /* ==========================================================================
    FONTS – Satoshi (public/fonts/)
@@ -46,9 +45,9 @@
 }
 
 /* ==========================================================================
-   HOMEPATH DESIGN SYSTEM – Colors (trust-blue palette)
+   HOMEPATH DESIGN SYSTEM – Colors (deep violet palette, light theme only)
    Short names: e.g. --color-text-primary-900. Use: bg-button-primary-default, text-text-primary-900
-   Light colors: design-tokens-light.css. Dark colors: design-tokens-dark.css (apply [data-theme="dark"] to enable).
+   All colors: design-tokens-light.css.
    ========================================================================== */
 
 @theme inline {
@@ -344,8 +343,7 @@
     0 20px 24px -4px var(--color-effects-shadows-shadow-xl-01);
 }
 
-/* Default is light theme (white bg, dark text). Apply [data-theme="dark"] on
-   html to opt into dark mode. */
+/* Light theme only — no dark mode. */
 
 html {
   scroll-behavior: smooth;

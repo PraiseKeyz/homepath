@@ -7,7 +7,10 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id }, select: SafeUserSelect });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: SafeUserSelect,
+    });
     if (!user) throw new NotFoundException('User not found');
     return user;
   }

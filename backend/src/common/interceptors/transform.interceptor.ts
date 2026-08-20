@@ -15,17 +15,27 @@ export interface ApiResponse<T> {
   timestamp: string;
 }
 
-// Every service/controller returns { data?, message? }:
-//   data    → the actual payload
-//   message → human-readable description of what happened
+// Every controller method returns { data, message? } — this is the one place
+// that shape gets wrapped into the envelope every response actually sends.
+interface ControllerResponse<T> {
+  data: T | null;
+  message?: string;
+}
+
 @Injectable()
-export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
-  intercept(_context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
+export class TransformInterceptor<T = unknown> implements NestInterceptor<
+  ControllerResponse<T>,
+  ApiResponse<T>
+> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler<ControllerResponse<T>>,
+  ): Observable<ApiResponse<T>> {
     return next.handle().pipe(
       map((payload) => ({
         success: true,
-        message: payload?.message ?? 'Request successful',
-        data: payload?.data ?? payload ?? null,
+        message: payload.message ?? 'Request successful',
+        data: payload.data ?? null,
         error: null,
         timestamp: new Date().toISOString(),
       })),

@@ -1,8 +1,15 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { SafeUserSelect } from '../common/constants/safe-user.constant.js';
+import {
+  SafeUser,
+  SafeUserSelect,
+} from '../common/constants/safe-user.constant.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 
@@ -14,7 +21,9 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
     if (existing) throw new ConflictException('Email already in use');
 
     const password = await argon2.hash(dto.password);
@@ -33,13 +42,22 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const passwordValid = await argon2.verify(user.password, dto.password);
     if (!passwordValid) throw new UnauthorizedException('Invalid credentials');
 
-    const { password: _password, ...safeUser } = user;
+    const safeUser: SafeUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      createdAt: user.createdAt,
+    };
     return { data: { user: safeUser, accessToken: this.signToken(user.id) } };
   }
 

@@ -18,12 +18,18 @@ export class CooperativesService {
   }
 
   async join(cooperativeId: string, userId: string, dto: JoinCooperativeDto) {
-    const cooperative = await this.prisma.cooperative.findUnique({ where: { id: cooperativeId } });
+    const cooperative = await this.prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+    });
     if (!cooperative) throw new NotFoundException('Cooperative not found');
 
     return this.prisma.cooperativeMembership.upsert({
       where: { cooperativeId_userId: { cooperativeId, userId } },
-      create: { cooperativeId, userId, monthlyContributionAmount: dto.monthlyContributionAmount },
+      create: {
+        cooperativeId,
+        userId,
+        monthlyContributionAmount: dto.monthlyContributionAmount,
+      },
       update: { monthlyContributionAmount: dto.monthlyContributionAmount },
     });
   }

@@ -9,7 +9,12 @@ import { CommunityReportType } from '../../generated/prisma/index.js';
 // composite of two independently-checkable signals — registry match and
 // community reports. AI is not part of this computation; it only narrates the
 // result afterwards (see AiExplanationService).
-const REGISTRY_BASE_SCORE = { CLEAN: 85, FLAGGED: 15, DISPUTED: 15, NOT_FOUND: 50 } as const;
+const REGISTRY_BASE_SCORE = {
+  CLEAN: 85,
+  FLAGGED: 15,
+  DISPUTED: 15,
+  NOT_FOUND: 50,
+} as const;
 const CONFIRMATION_WEIGHT = 3;
 const CONFIRMATION_CAP = 10;
 const DISPUTE_WEIGHT = 8;
@@ -26,7 +31,11 @@ export class TrustLayerService {
     private readonly aiExplanationService: AiExplanationService,
   ) {}
 
-  async submitDocument(propertyId: string, submittedById: string, dto: SubmitDocumentDto) {
+  async submitDocument(
+    propertyId: string,
+    submittedById: string,
+    dto: SubmitDocumentDto,
+  ) {
     await this.assertPropertyExists(propertyId);
     return this.prisma.propertyDocument.upsert({
       where: { propertyId },
@@ -35,15 +44,26 @@ export class TrustLayerService {
     });
   }
 
-  async submitReport(propertyId: string, reporterId: string, dto: SubmitReportDto) {
+  async submitReport(
+    propertyId: string,
+    reporterId: string,
+    dto: SubmitReportDto,
+  ) {
     await this.assertPropertyExists(propertyId);
     return this.prisma.communityReport.create({
-      data: { propertyId, reporterId, type: dto.type, description: dto.description },
+      data: {
+        propertyId,
+        reporterId,
+        type: dto.type,
+        description: dto.description,
+      },
     });
   }
 
   async computeTrustScore(propertyId: string) {
-    const document = await this.prisma.propertyDocument.findUnique({ where: { propertyId } });
+    const document = await this.prisma.propertyDocument.findUnique({
+      where: { propertyId },
+    });
     if (!document) {
       throw new NotFoundException(
         'No self-attested document submitted for this property yet — submit one before requesting a Trust Score.',
@@ -60,10 +80,16 @@ export class TrustLayerService {
     });
     const registryStatus = registryRecord?.status ?? 'NOT_FOUND';
 
-    const reports = await this.prisma.communityReport.findMany({ where: { propertyId } });
-    const confirmationCount = reports.filter((r) => r.type === CommunityReportType.CONFIRMATION).length;
+    const reports = await this.prisma.communityReport.findMany({
+      where: { propertyId },
+    });
+    const confirmationCount = reports.filter(
+      (r) => r.type === CommunityReportType.CONFIRMATION,
+    ).length;
     const disputeCount = reports.filter(
-      (r) => r.type === CommunityReportType.DISPUTE || r.type === CommunityReportType.FRAUD_FLAG,
+      (r) =>
+        r.type === CommunityReportType.DISPUTE ||
+        r.type === CommunityReportType.FRAUD_FLAG,
     ).length;
 
     const base = REGISTRY_BASE_SCORE[registryStatus];
@@ -99,7 +125,9 @@ export class TrustLayerService {
   }
 
   private async assertPropertyExists(propertyId: string) {
-    const property = await this.prisma.property.findUnique({ where: { id: propertyId } });
+    const property = await this.prisma.property.findUnique({
+      where: { id: propertyId },
+    });
     if (!property) throw new NotFoundException('Property not found');
   }
 }

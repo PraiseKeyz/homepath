@@ -1,12 +1,10 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import { CooperativesService } from './cooperatives.service.js';
 import { CreateCooperativeDto } from './dto/create-cooperative.dto.js';
 import { JoinCooperativeDto } from './dto/join-cooperative.dto.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import type { SafeUser } from '../common/constants/safe-user.constant.js';
 
-@ApiTags('cooperatives')
 @Controller('cooperatives')
 export class CooperativesController {
   constructor(private readonly cooperativesService: CooperativesService) {}
