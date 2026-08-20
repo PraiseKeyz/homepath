@@ -14,4 +14,29 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
+
+  async findLandlordProfile(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: SafeUserSelect,
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    const [totalListings, soldOrRented, available] = await Promise.all([
+      this.prisma.property.count({ where: { ownerId: id } }),
+      this.prisma.property.count({
+        where: { ownerId: id, status: { in: ['MATCHED', 'UNAVAILABLE'] } },
+      }),
+      this.prisma.property.count({
+        where: { ownerId: id, status: 'AVAILABLE' },
+      }),
+    ]);
+
+    return {
+      ...user,
+      totalListings,
+      propertiesSoldOrRented: soldOrRented,
+      availableListings: available,
+    };
+  }
 }

@@ -1,9 +1,21 @@
-import { IsEnum, IsInt, IsNumber, IsString, Min } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { PropertyListingType } from '../../../generated/prisma/index.js';
 
 export class CreatePropertyDto {
   @IsString()
   title!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @IsEnum(PropertyListingType)
   listingType!: PropertyListingType;
@@ -27,4 +39,13 @@ export class CreatePropertyDto {
 
   @IsString()
   areaKey!: string;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  galleryImages?: string[];
 }

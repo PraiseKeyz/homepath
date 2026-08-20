@@ -97,7 +97,9 @@ export interface TrustScore {
 export interface Property {
   id: string;
   ownerId: string;
+  owner?: User | null;
   title: string;
+  description?: string | null;
   listingType: PropertyListingType;
   price: string;
   bedrooms: number;
@@ -106,6 +108,8 @@ export interface Property {
   lng: number;
   areaKey: string;
   status: PropertyStatus;
+  imageUrl?: string | null;
+  galleryImages?: string[];
   createdAt: string;
   updatedAt: string;
   trustScore?: TrustScore | null;
@@ -135,12 +139,49 @@ export interface PropertyDetail extends Property {
   communityReports: CommunityReport[];
 }
 
+export interface LandlordProfile extends User {
+  totalListings: number;
+  propertiesSoldOrRented: number;
+  availableListings: number;
+}
+
+export function fetchUser(id: string) {
+  return apiFetch<User>(`/users/${id}`);
+}
+
+export function fetchLandlordProfile(id: string) {
+  return apiFetch<LandlordProfile>(`/users/${id}/profile`);
+}
+
 export function fetchProperties() {
   return apiFetch<Property[]>("/properties");
 }
 
 export function fetchProperty(id: string) {
   return apiFetch<PropertyDetail>(`/properties/${id}`);
+}
+
+export function createProperty(
+  token: string,
+  input: {
+    title: string;
+    description?: string;
+    listingType: PropertyListingType;
+    price: number;
+    bedrooms: number;
+    address: string;
+    lat: number;
+    lng: number;
+    areaKey: string;
+    imageUrl?: string;
+    galleryImages?: string[];
+  },
+) {
+  return apiFetch<Property>("/properties", {
+    method: "POST",
+    headers: authHeader(token),
+    body: JSON.stringify(input),
+  });
 }
 
 export function computeTrustScore(propertyId: string) {
@@ -218,4 +259,30 @@ export function fetchDemandClusters(token: string) {
   return apiFetch<DemandCluster[]>("/cooperatives/demand-clusters", {
     headers: authHeader(token),
   });
+}
+
+// ── Saved Properties (localStorage) ─────────────────────────────────────────
+const SAVED_KEY = "homepath_saved_properties";
+
+export function getSavedPropertyIds(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+export function toggleSavedProperty(id: string): boolean {
+  const saved = getSavedPropertyIds();
+  const idx = saved.indexOf(id);
+  if (idx === -1) {
+    saved.push(id);
+    localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+    return true;
+  } else {
+    saved.splice(idx, 1);
+    localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+    return false;
+  }
 }

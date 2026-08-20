@@ -39,7 +39,7 @@ pnpm install
 cd backend
 cp .env.example .env   # set DATABASE_URL to your local Postgres, add JWT_SECRET, ANTHROPIC_API_KEY
 pnpm prisma:migrate
-pnpm prisma:seed
+pnpm prisma:migrate
 pnpm start:dev
 ```
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, PiggyBank } from "lucide-react";
+import { Building2, Home, PiggyBank } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,19 +14,25 @@ const NAV_ITEMS: {
   icon: typeof PiggyBank;
   roles: User["role"][] | null;
 }[] = [
-  {
-    href: "/dashboard/cooperative",
-    label: "Cooperative Savings",
-    icon: PiggyBank,
-    roles: null,
-  },
-  {
-    href: "/dashboard/build-match",
-    label: "BuildMatch",
-    icon: Building2,
-    roles: ["DEVELOPER"],
-  },
-];
+    {
+      href: "/dashboard/home",
+      label: "Browse Homes",
+      icon: Home,
+      roles: null,
+    },
+    {
+      href: "/dashboard/cooperative",
+      label: "Cooperative Savings",
+      icon: PiggyBank,
+      roles: null,
+    },
+    {
+      href: "/dashboard/build-match",
+      label: "BuildMatch",
+      icon: Building2,
+      roles: ["DEVELOPER"],
+    },
+  ];
 
 export function DashboardSidebar() {
   const pathname = usePathname();
@@ -54,7 +60,8 @@ export function DashboardSidebar() {
 
       <nav className="mt-8 space-y-1">
         {items.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+          const isActive =
+            pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
@@ -62,7 +69,7 @@ export function DashboardSidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-text-tertiary-600 hover:bg-background-bg-secondary-hover hover:text-text-primary-900",
                 isActive &&
-                  "bg-background-bg-brand-primary text-text-brand-secondary-700 hover:bg-background-bg-brand-primary",
+                "bg-background-bg-brand-primary text-text-brand-secondary-700 hover:bg-background-bg-brand-primary",
               )}
             >
               <item.icon className="h-4 w-4" />

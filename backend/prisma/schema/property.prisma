@@ -11,20 +11,23 @@ enum PropertyStatus {
 }
 
 model Property {
-  id          String              @id @default(cuid())
-  ownerId     String
-  owner       User                @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  title       String
-  listingType PropertyListingType
-  price       Decimal             @db.Decimal(14, 2)
-  bedrooms    Int
-  address     String
-  lat         Float
-  lng         Float
-  areaKey     String
-  status      PropertyStatus      @default(AVAILABLE)
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  id            String              @id @default(cuid())
+  ownerId       String
+  owner         User                @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  listingType   PropertyListingType
+  price         Decimal             @db.Decimal(14, 2)
+  bedrooms      Int
+  address       String
+  lat           Float
+  lng           Float
+  areaKey       String
+  status        PropertyStatus      @default(AVAILABLE)
+  imageUrl      String?
+  galleryImages String[]            @default([])
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
   document         PropertyDocument?
   communityReports CommunityReport[]
