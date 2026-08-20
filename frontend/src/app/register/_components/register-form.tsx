@@ -48,7 +48,7 @@ export function RegisterForm() {
         role,
       });
       setSession(accessToken, user);
-      router.push("/");
+      router.push("/dashboard/properties");
       router.refresh();
     } catch (err) {
       setError(

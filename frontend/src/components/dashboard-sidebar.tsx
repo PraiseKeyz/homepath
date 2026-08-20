@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, PiggyBank } from "lucide-react";
+import { Building2, Home, PiggyBank } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,6 +14,12 @@ const NAV_ITEMS: {
   icon: typeof PiggyBank;
   roles: User["role"][] | null;
 }[] = [
+  {
+    href: "/dashboard/home",
+    label: "Browse Homes",
+    icon: Home,
+    roles: null,
+  },
   {
     href: "/dashboard/cooperative",
     label: "Cooperative Savings",
@@ -54,7 +60,8 @@ export function DashboardSidebar() {
 
       <nav className="mt-8 space-y-1">
         {items.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+          const isActive =
+            pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}

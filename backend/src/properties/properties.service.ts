@@ -14,7 +14,19 @@ export class PropertiesService {
   // (see docs/ARCHITECTURE.md §5 — Property Search Map + Trust Heatmap).
   findAll() {
     return this.prisma.property.findMany({
-      include: { trustScore: true },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            role: true,
+            createdAt: true,
+          },
+        },
+        trustScore: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -22,7 +34,21 @@ export class PropertiesService {
   async findOne(id: string) {
     const property = await this.prisma.property.findUnique({
       where: { id },
-      include: { trustScore: true, document: true, communityReports: true },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            role: true,
+            createdAt: true,
+          },
+        },
+        trustScore: true,
+        document: true,
+        communityReports: true,
+      },
     });
     if (!property) throw new NotFoundException('Property not found');
     return property;

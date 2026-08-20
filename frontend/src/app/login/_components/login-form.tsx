@@ -22,7 +22,7 @@ export function LoginForm() {
     try {
       const { user, accessToken } = await login({ email, password });
       setSession(accessToken, user);
-      router.push("/");
+      router.push("/dashboard/properties");
       router.refresh();
     } catch (err) {
       setError(

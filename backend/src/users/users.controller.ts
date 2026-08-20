@@ -30,4 +30,10 @@ export class UsersController {
   ) {
     return { data: await this.usersService.rateLandlord(id, user.id, dto) };
   }
+
+  @Public()
+  @Get(':id/profile')
+  async getLandlordProfile(@Param('id') id: string) {
+    return { data: await this.usersService.findLandlordProfile(id) };
+  }
 }
