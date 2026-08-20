@@ -7,6 +7,12 @@ export class NeighbourhoodController {
   constructor(private readonly neighbourhoodService: NeighbourhoodService) {}
 
   @Public()
+  @Get()
+  async findAll() {
+    return { data: await this.neighbourhoodService.findAll() };
+  }
+
+  @Public()
   @Get(':areaKey')
   async findByAreaKey(@Param('areaKey') areaKey: string) {
     return { data: await this.neighbourhoodService.findByAreaKey(areaKey) };

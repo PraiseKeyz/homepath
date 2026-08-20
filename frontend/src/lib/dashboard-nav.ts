@@ -6,7 +6,6 @@ import {
   Home,
   LayoutDashboard,
   MapPinned,
-  MessageCircle,
   Settings,
   ShieldCheck,
   User as UserIcon,
@@ -73,13 +72,6 @@ export const DASHBOARD_NAV_ITEMS: DashboardNavItem[] = [
     group: "main",
     icon: Building2,
     roles: ["DEVELOPER"],
-  },
-  {
-    href: "/dashboard/messages",
-    label: "Messages",
-    group: "account",
-    icon: MessageCircle,
-    roles: null,
   },
   {
     href: "/dashboard/notifications",

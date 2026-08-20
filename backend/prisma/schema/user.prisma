@@ -22,4 +22,7 @@ model User {
   ratingsGiven            LandlordRating[]          @relation("RatingAuthor")
   ratingsReceived         LandlordRating[]          @relation("RatingTarget")
   payments                Payment[]
+  conversationsIn         ConversationParticipant[]
+  messagesSent            Message[]
+  notifications           Notification[]
 }

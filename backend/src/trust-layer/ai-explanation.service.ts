@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenAI } from '@google/genai';
 
 export interface TrustScoreExplanationInput {
   score: number;
@@ -19,12 +19,12 @@ const DISCLAIMER =
 @Injectable()
 export class AiExplanationService {
   private readonly logger = new Logger(AiExplanationService.name);
-  private readonly client?: Anthropic;
+  private readonly client?: GoogleGenAI;
 
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('ANTHROPIC_API_KEY');
+    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
     if (apiKey) {
-      this.client = new Anthropic({ apiKey });
+      this.client = new GoogleGenAI({ apiKey });
     }
   }
 
@@ -34,30 +34,29 @@ export class AiExplanationService {
     }
 
     try {
-      const message = await this.client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 200,
-        system:
-          'You narrate a property Trust Score for a Nigerian housing platform. ' +
-          'You are given an already-computed score and the deterministic signals behind it ' +
-          '(a registry lookup status, and counts of community confirmation/dispute reports). ' +
-          'Explain the score in plain, reassuring-but-honest English in 2-3 sentences. ' +
-          'You must never claim the property, document, or ownership is verified, authentic, ' +
-          'or legitimate as a matter of fact — only describe what the registry and community ' +
-          'signals show. Always end with this exact sentence: ' +
-          `"${DISCLAIMER}"`,
-        messages: [
-          {
-            role: 'user',
-            content: JSON.stringify(input),
-          },
-        ],
+      const response = await this.client.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: JSON.stringify(input),
+        config: {
+          maxOutputTokens: 200,
+          systemInstruction:
+            'You narrate a property Trust Score for a Nigerian housing platform. ' +
+            'You are given an already-computed score and the deterministic signals behind it ' +
+            '(a registry lookup status, and counts of community confirmation/dispute reports). ' +
+            'Explain the score in plain, reassuring-but-honest English in 2-3 sentences. ' +
+            'You must never claim the property, document, or ownership is verified, authentic, ' +
+            'or legitimate as a matter of fact — only describe what the registry and community ' +
+            'signals show. Always end with this exact sentence: ' +
+            `"${DISCLAIMER}"`,
+        },
       });
 
-      const textBlock = message.content.find((block) => block.type === 'text');
-      return textBlock?.text ?? `${this.fallbackSummary(input)} ${DISCLAIMER}`;
+      const text = response.text;
+      return text?.trim()
+        ? text
+        : `${this.fallbackSummary(input)} ${DISCLAIMER}`;
     } catch (error) {
-      this.logger.warn(`Claude explanation failed, using fallback: ${error}`);
+      this.logger.warn(`Gemini explanation failed, using fallback: ${error}`);
       return `${this.fallbackSummary(input)} ${DISCLAIMER}`;
     }
   }

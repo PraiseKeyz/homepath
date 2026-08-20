@@ -8,10 +8,15 @@ import { CreateCooperativeDto } from './dto/create-cooperative.dto.js';
 import { JoinCooperativeDto } from './dto/join-cooperative.dto.js';
 import { ProposeRentToOwnMatchDto } from './dto/propose-match.dto.js';
 import { RespondRentToOwnMatchDto } from './dto/respond-match.dto.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
+import { NotificationType } from '../../generated/prisma/index.js';
 
 @Injectable()
 export class CooperativesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   create(dto: CreateCooperativeDto) {
     return this.prisma.cooperative.create({ data: dto });
@@ -117,6 +122,7 @@ export class CooperativesService {
   ) {
     const match = await this.prisma.rentToOwnMatch.findUnique({
       where: { id: matchId },
+      include: { property: true, cooperative: true },
     });
     if (!match) throw new NotFoundException('Match not found');
 
@@ -134,9 +140,22 @@ export class CooperativesService {
       );
     }
 
-    return this.prisma.rentToOwnMatch.update({
+    const updated = await this.prisma.rentToOwnMatch.update({
       where: { id: matchId },
       data: { status: dto.status },
     });
+
+    await this.notificationsService.create(
+      match.property.ownerId,
+      dto.status === 'ACCEPTED'
+        ? NotificationType.MATCH_ACCEPTED
+        : NotificationType.MATCH_DECLINED,
+      dto.status === 'ACCEPTED'
+        ? 'Rent-to-own match accepted'
+        : 'Rent-to-own match declined',
+      `${match.cooperative.name} ${dto.status === 'ACCEPTED' ? 'accepted' : 'declined'} your match for "${match.property.title}".`,
+    );
+
+    return updated;
   }
 }

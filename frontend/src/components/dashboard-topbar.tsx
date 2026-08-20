@@ -20,7 +20,7 @@ function greeting() {
 export function DashboardTopbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { setMobileNavOpen } = useDashboardShell();
+  const { setMobileNavOpen, unreadCount } = useDashboardShell();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -76,6 +76,11 @@ export function DashboardTopbar() {
           aria-label="Notifications"
         >
           <Bell className="h-4 w-4" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-utility-error-500 px-1 text-[10px] font-bold text-text-white">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </Link>
         {user && <UserMenu user={user} onSignOut={handleSignOut} />}
       </div>

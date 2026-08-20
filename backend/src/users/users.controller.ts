@@ -1,6 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreateLandlordRatingDto } from './dto/create-landlord-rating.dto.js';
+import { UpdateProfileDto } from './dto/update-profile.dto.js';
+import { ChangePasswordDto } from './dto/change-password.dto.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { Public } from '../common/decorators/public.decorator.js';
 import type { SafeUser } from '../common/constants/safe-user.constant.js';
@@ -12,6 +14,24 @@ export class UsersController {
   @Get(':id')
   async findById(@Param('id') id: string) {
     return { data: await this.usersService.findById(id) };
+  }
+
+  @Patch(':id')
+  async updateProfile(
+    @Param('id') id: string,
+    @CurrentUser() user: SafeUser,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return { data: await this.usersService.updateProfile(id, user.id, dto) };
+  }
+
+  @Patch(':id/password')
+  async changePassword(
+    @Param('id') id: string,
+    @CurrentUser() user: SafeUser,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return { data: await this.usersService.changePassword(id, user.id, dto) };
   }
 
   // Ratings are public — a renter should be able to check a landlord's

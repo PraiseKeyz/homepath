@@ -1,0 +1,24 @@
+// Notifications are only ever created from real events already happening
+// elsewhere in the app (a match response, a rating, a report, a message) —
+// never a standalone/simulated feed. See NotificationsService.
+enum NotificationType {
+  MATCH_ACCEPTED
+  MATCH_DECLINED
+  RATING_RECEIVED
+  COMMUNITY_REPORT_FILED
+  NEW_MESSAGE
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([userId, isRead])
+}

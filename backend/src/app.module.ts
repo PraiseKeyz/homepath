@@ -10,6 +10,8 @@ import { PropertiesModule } from './properties/properties.module.js';
 import { TrustLayerModule } from './trust-layer/trust-layer.module.js';
 import { CooperativesModule } from './cooperatives/cooperatives.module.js';
 import { NeighbourhoodModule } from './neighbourhood/neighbourhood.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
+import { MessagingModule } from './messaging/messaging.module.js';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from './auth/guards/roles.guard.js';
 import { PaymentsModule } from './payments/payments.module.js';
@@ -25,6 +27,8 @@ import { PaymentsModule } from './payments/payments.module.js';
     CooperativesModule,
     PaymentsModule,
     NeighbourhoodModule,
+    NotificationsModule,
+    MessagingModule,
   ],
   controllers: [AppController],
   providers: [
