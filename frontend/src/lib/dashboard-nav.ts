@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Bell,
   Building2,
+  CreditCard,
   Home,
   LayoutDashboard,
   MapPinned,
@@ -50,6 +51,13 @@ export const DASHBOARD_NAV_ITEMS: DashboardNavItem[] = [
     label: "Cooperatives",
     group: "main",
     icon: Users,
+    roles: null,
+  },
+  {
+    href: "/dashboard/payments",
+    label: "Payments",
+    group: "main",
+    icon: CreditCard,
     roles: null,
   },
   {

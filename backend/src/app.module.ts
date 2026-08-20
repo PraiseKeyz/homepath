@@ -12,6 +12,7 @@ import { CooperativesModule } from './cooperatives/cooperatives.module.js';
 import { NeighbourhoodModule } from './neighbourhood/neighbourhood.module.js';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from './auth/guards/roles.guard.js';
+import { PaymentsModule } from './payments/payments.module.js';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RolesGuard } from './auth/guards/roles.guard.js';
     PropertiesModule,
     TrustLayerModule,
     CooperativesModule,
+    PaymentsModule,
     NeighbourhoodModule,
   ],
   controllers: [AppController],

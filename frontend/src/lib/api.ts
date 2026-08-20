@@ -336,6 +336,62 @@ export function fetchNeighbourhood(areaKey: string) {
   return apiFetch<NeighbourhoodData>(`/neighbourhood/${areaKey}`);
 }
 
+// ── Payments (Flutterwave) ────────────────────────────────────────────────────
+
+export type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
+
+export interface Payment {
+  id: string;
+  userId: string;
+  membershipId: string;
+  amount: string;
+  currency: string;
+  provider: string;
+  providerTxId: string | null;
+  txRef: string;
+  status: PaymentStatus;
+  checkoutUrl: string | null;
+  contributionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  membership: CooperativeMembership;
+  contribution: Contribution | null;
+}
+
+export interface PaymentInitResponse {
+  paymentId: string;
+  checkoutUrl: string;
+  txRef: string;
+}
+
+export function initializePayment(
+  token: string,
+  input: { membershipId: string; amount: number },
+) {
+  return apiFetch<PaymentInitResponse>("/payments/initialize", {
+    method: "POST",
+    headers: authHeader(token),
+    body: JSON.stringify(input),
+  });
+}
+
+export function verifyPayment(
+  token: string,
+  input: { transactionId: string; txRef: string },
+) {
+  return apiFetch<Payment>("/payments/verify", {
+    method: "POST",
+    headers: authHeader(token),
+    body: JSON.stringify(input),
+  });
+}
+
+export function fetchPaymentHistory(token: string) {
+  return apiFetch<Payment[]>("/payments/history", {
+    headers: authHeader(token),
+  });
+}
+
 // ── Saved Properties (localStorage) ─────────────────────────────────────────
 const SAVED_KEY = "homepath_saved_properties";
 

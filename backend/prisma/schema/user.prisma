@@ -21,4 +21,5 @@ model User {
   cooperativeMemberships  CooperativeMembership[]
   ratingsGiven            LandlordRating[]          @relation("RatingAuthor")
   ratingsReceived         LandlordRating[]          @relation("RatingTarget")
+  payments                Payment[]
 }

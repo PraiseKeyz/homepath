@@ -21,6 +21,7 @@ model CooperativeMembership {
   joinedAt                  DateTime    @default(now())
 
   contributions Contribution[]
+  payments      Payment[]
 
   @@unique([cooperativeId, userId])
 }
@@ -33,6 +34,7 @@ model Contribution {
   amount       Decimal                @db.Decimal(12, 2)
   month        DateTime
   createdAt    DateTime               @default(now())
+  payment      Payment?
 
   @@index([membershipId])
 }

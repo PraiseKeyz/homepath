@@ -1,5 +1,6 @@
 import { PiggyBank } from "lucide-react";
 import type { CooperativeMembership } from "@/lib/api";
+import { PayContributionDialog } from "./pay-contribution-dialog";
 
 const MONTH_FORMATTER = new Intl.DateTimeFormat("en-GB", {
   month: "short",
@@ -80,6 +81,10 @@ export function MembershipCard({
           })}
         </div>
       )}
+
+      <div className="mt-5 flex justify-end border-t border-border-secondary pt-4">
+        <PayContributionDialog membership={membership} />
+      </div>
     </div>
   );
 }
