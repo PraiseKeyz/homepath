@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateCooperativeDto } from './dto/create-cooperative.dto.js';
 import { JoinCooperativeDto } from './dto/join-cooperative.dto.js';
+import { ProposeRentToOwnMatchDto } from './dto/propose-match.dto.js';
+import { RespondRentToOwnMatchDto } from './dto/respond-match.dto.js';
 
 @Injectable()
 export class CooperativesService {
@@ -65,5 +71,72 @@ export class CooperativesService {
         0,
       ),
     }));
+  }
+
+  // RentToOwnMatch (docs/ARCHITECTURE.md §4/§6, journey step 6 "Own") — a
+  // property's owner proposes a match to a cooperative; a member of that
+  // cooperative accepts or declines it. Not a separate module per §3's
+  // documented module list — RentToOwnMatch is a Cooperatives-domain flow.
+  async proposeMatch(
+    cooperativeId: string,
+    requestingUserId: string,
+    dto: ProposeRentToOwnMatchDto,
+  ) {
+    const cooperative = await this.prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+    });
+    if (!cooperative) throw new NotFoundException('Cooperative not found');
+
+    const property = await this.prisma.property.findUnique({
+      where: { id: dto.propertyId },
+    });
+    if (!property) throw new NotFoundException('Property not found');
+    if (property.ownerId !== requestingUserId) {
+      throw new ForbiddenException(
+        'Only the property owner can propose a match for this property',
+      );
+    }
+
+    return this.prisma.rentToOwnMatch.create({
+      data: { cooperativeId, propertyId: dto.propertyId },
+    });
+  }
+
+  async findMatches(cooperativeId: string) {
+    return this.prisma.rentToOwnMatch.findMany({
+      where: { cooperativeId },
+      include: { property: true },
+      orderBy: { matchedAt: 'desc' },
+    });
+  }
+
+  async respondToMatch(
+    matchId: string,
+    requestingUserId: string,
+    dto: RespondRentToOwnMatchDto,
+  ) {
+    const match = await this.prisma.rentToOwnMatch.findUnique({
+      where: { id: matchId },
+    });
+    if (!match) throw new NotFoundException('Match not found');
+
+    const membership = await this.prisma.cooperativeMembership.findUnique({
+      where: {
+        cooperativeId_userId: {
+          cooperativeId: match.cooperativeId,
+          userId: requestingUserId,
+        },
+      },
+    });
+    if (!membership) {
+      throw new ForbiddenException(
+        'Only members of this cooperative can respond to a match',
+      );
+    }
+
+    return this.prisma.rentToOwnMatch.update({
+      where: { id: matchId },
+      data: { status: dto.status },
+    });
   }
 }

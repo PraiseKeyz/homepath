@@ -1,3 +1,6 @@
 node_modules/
 .DS_Store
 *.log
+HomePath_Team_Brief.md
+.claude
+graphify-out/
