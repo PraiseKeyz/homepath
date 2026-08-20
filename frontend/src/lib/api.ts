@@ -148,3 +148,74 @@ export function computeTrustScore(propertyId: string) {
     method: "POST",
   });
 }
+
+export interface Cooperative {
+  id: string;
+  name: string;
+  targetAreaKey: string;
+  targetPropertyType: string;
+  createdAt: string;
+  _count?: { memberships: number };
+}
+
+export interface Contribution {
+  id: string;
+  membershipId: string;
+  amount: string;
+  month: string;
+  createdAt: string;
+}
+
+export interface CooperativeMembership {
+  id: string;
+  cooperativeId: string;
+  userId: string;
+  monthlyContributionAmount: string;
+  joinedAt: string;
+  cooperative: Cooperative;
+  contributions: Contribution[];
+}
+
+export interface DemandCluster {
+  cooperativeId: string;
+  name: string;
+  targetAreaKey: string;
+  targetPropertyType: string;
+  memberCount: number;
+  totalMonthlySavings: number;
+}
+
+function authHeader(token: string): HeadersInit {
+  return { Authorization: `Bearer ${token}` };
+}
+
+export function fetchCooperatives() {
+  return apiFetch<Cooperative[]>("/cooperatives");
+}
+
+export function fetchMyMemberships(token: string) {
+  return apiFetch<CooperativeMembership[]>("/cooperatives/my-memberships", {
+    headers: authHeader(token),
+  });
+}
+
+export function joinCooperative(
+  cooperativeId: string,
+  token: string,
+  input: { monthlyContributionAmount: number },
+) {
+  return apiFetch<CooperativeMembership>(
+    `/cooperatives/${cooperativeId}/join`,
+    {
+      method: "POST",
+      headers: authHeader(token),
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function fetchDemandClusters(token: string) {
+  return apiFetch<DemandCluster[]>("/cooperatives/demand-clusters", {
+    headers: authHeader(token),
+  });
+}

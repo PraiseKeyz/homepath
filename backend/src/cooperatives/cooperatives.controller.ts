@@ -3,7 +3,9 @@ import { CooperativesService } from './cooperatives.service.js';
 import { CreateCooperativeDto } from './dto/create-cooperative.dto.js';
 import { JoinCooperativeDto } from './dto/join-cooperative.dto.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
 import type { SafeUser } from '../common/constants/safe-user.constant.js';
+import { UserRole } from '../../generated/prisma/index.js';
 
 @Controller('cooperatives')
 export class CooperativesController {
@@ -19,9 +21,15 @@ export class CooperativesController {
     return { data: await this.cooperativesService.findAll() };
   }
 
+  @Roles(UserRole.DEVELOPER)
   @Get('demand-clusters')
   async demandClusters() {
     return { data: await this.cooperativesService.demandClusters() };
+  }
+
+  @Get('my-memberships')
+  async myMemberships(@CurrentUser() user: SafeUser) {
+    return { data: await this.cooperativesService.findMyMemberships(user.id) };
   }
 
   @Post(':id/join')

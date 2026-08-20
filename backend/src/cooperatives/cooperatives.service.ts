@@ -17,6 +17,17 @@ export class CooperativesService {
     });
   }
 
+  findMyMemberships(userId: string) {
+    return this.prisma.cooperativeMembership.findMany({
+      where: { userId },
+      include: {
+        cooperative: true,
+        contributions: { orderBy: { month: 'asc' } },
+      },
+      orderBy: { joinedAt: 'asc' },
+    });
+  }
+
   async join(cooperativeId: string, userId: string, dto: JoinCooperativeDto) {
     const cooperative = await this.prisma.cooperative.findUnique({
       where: { id: cooperativeId },
@@ -34,9 +45,6 @@ export class CooperativesService {
     });
   }
 
-  // BuildMatch (docs/ARCHITECTURE.md §4): demand clusters are not a stored
-  // table, just an aggregate read over Contribution grouped by target area —
-  // "in Mowe-Ofada, N cooperative members are saving ₦X/month toward a unit".
   async demandClusters() {
     const cooperatives = await this.prisma.cooperative.findMany({
       include: {

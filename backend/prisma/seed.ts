@@ -113,13 +113,45 @@ async function main() {
     update: {},
   });
 
-  await prisma.cooperativeMembership.upsert({
+  const buyerMembership = await prisma.cooperativeMembership.upsert({
     where: { cooperativeId_userId: { cooperativeId: cooperative.id, userId: buyer.id } },
     create: { cooperativeId: cooperative.id, userId: buyer.id, monthlyContributionAmount: 18000 },
     update: {},
   });
 
+  const ojoduCooperative = await prisma.cooperative.upsert({
+    where: { id: 'demo-coop-ojodu' },
+    create: {
+      id: 'demo-coop-ojodu',
+      name: 'Ojodu 2-Bedroom Savers',
+      targetAreaKey: 'ojodu',
+      targetPropertyType: '2-bedroom',
+    },
+    update: {},
+  });
+
+  const landlordMembership = await prisma.cooperativeMembership.upsert({
+    where: { cooperativeId_userId: { cooperativeId: ojoduCooperative.id, userId: landlord.id } },
+    create: { cooperativeId: ojoduCooperative.id, userId: landlord.id, monthlyContributionAmount: 15000 },
+    update: {},
+  });
+
+  // Seeded contribution history so the cooperative dashboard has something real
+  // to show — see docs/ARCHITECTURE.md §5 ("seeded, not live payment integration").
+  await seedContributions(buyerMembership.id, 18000, 6);
+  await seedContributions(landlordMembership.id, 15000, 3);
+
   console.log('Seed complete:', { buyer: buyer.email, landlord: landlord.email, developer: developer.email });
+}
+
+async function seedContributions(membershipId: string, amount: number, months: number) {
+  const now = new Date();
+  for (let i = months - 1; i >= 0; i--) {
+    const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const existing = await prisma.contribution.findFirst({ where: { membershipId, month } });
+    if (existing) continue;
+    await prisma.contribution.create({ data: { membershipId, amount, month } });
+  }
 }
 
 main()
