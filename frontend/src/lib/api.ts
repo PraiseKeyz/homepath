@@ -230,8 +230,10 @@ function authHeader(token: string): HeadersInit {
   return { Authorization: `Bearer ${token}` };
 }
 
-export function fetchCooperatives() {
-  return apiFetch<Cooperative[]>("/cooperatives");
+export function fetchCooperatives(token: string) {
+  return apiFetch<Cooperative[]>("/cooperatives", {
+    headers: authHeader(token),
+  });
 }
 
 export function fetchMyMemberships(token: string) {
@@ -259,6 +261,79 @@ export function fetchDemandClusters(token: string) {
   return apiFetch<DemandCluster[]>("/cooperatives/demand-clusters", {
     headers: authHeader(token),
   });
+}
+
+export type RentToOwnStatus = "PROPOSED" | "ACCEPTED" | "DECLINED";
+
+export interface RentToOwnMatch {
+  id: string;
+  cooperativeId: string;
+  propertyId: string;
+  status: RentToOwnStatus;
+  matchedAt: string;
+  property: Property;
+}
+
+export function fetchRentToOwnMatches(cooperativeId: string, token: string) {
+  return apiFetch<RentToOwnMatch[]>(`/cooperatives/${cooperativeId}/matches`, {
+    headers: authHeader(token),
+  });
+}
+
+export function respondToRentToOwnMatch(
+  matchId: string,
+  token: string,
+  status: "ACCEPTED" | "DECLINED",
+) {
+  return apiFetch<RentToOwnMatch>(`/cooperatives/matches/${matchId}/respond`, {
+    method: "PATCH",
+    headers: authHeader(token),
+    body: JSON.stringify({ status }),
+  });
+}
+
+export interface LandlordRating {
+  id: string;
+  landlordId: string;
+  raterId: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
+
+export interface LandlordRatingsSummary {
+  ratings: LandlordRating[];
+  averageRating: number | null;
+  ratingCount: number;
+}
+
+export function fetchLandlordRatings(landlordId: string) {
+  return apiFetch<LandlordRatingsSummary>(`/users/${landlordId}/ratings`);
+}
+
+export function rateLandlord(
+  landlordId: string,
+  token: string,
+  input: { rating: number; comment?: string },
+) {
+  return apiFetch<LandlordRating>(`/users/${landlordId}/ratings`, {
+    method: "POST",
+    headers: authHeader(token),
+    body: JSON.stringify(input),
+  });
+}
+
+export interface NeighbourhoodData {
+  id: string;
+  areaKey: string;
+  floodRiskScore: number;
+  powerScore: number;
+  securityScore: number;
+  updatedAt: string;
+}
+
+export function fetchNeighbourhood(areaKey: string) {
+  return apiFetch<NeighbourhoodData>(`/neighbourhood/${areaKey}`);
 }
 
 // ── Saved Properties (localStorage) ─────────────────────────────────────────

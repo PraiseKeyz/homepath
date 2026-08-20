@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ErrorState } from "@/components/error-state";
 import {
+  ApiError,
   type Cooperative,
   type CooperativeMembership,
   fetchCooperatives,
@@ -10,27 +12,38 @@ import {
 import { getToken } from "@/lib/auth";
 import { JoinCooperativeDialog } from "./join-cooperative-dialog";
 import { MembershipCard } from "./membership-card";
+import { RentToOwnMatches } from "./rent-to-own-matches";
 
 export function CooperativeDashboard() {
   const [memberships, setMemberships] = useState<
     CooperativeMembership[] | null
   >(null);
   const [cooperatives, setCooperatives] = useState<Cooperative[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const token = getToken();
     if (!token) return;
-    const [myMemberships, allCooperatives] = await Promise.all([
-      fetchMyMemberships(token),
-      fetchCooperatives(),
-    ]);
-    setMemberships(myMemberships);
-    setCooperatives(allCooperatives);
+    setError(null);
+    try {
+      const [myMemberships, allCooperatives] = await Promise.all([
+        fetchMyMemberships(token),
+        fetchCooperatives(token),
+      ]);
+      setMemberships(myMemberships);
+      setCooperatives(allCooperatives);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Something went wrong.");
+    }
   }, []);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  if (error) {
+    return <ErrorState onRetry={load} homeHref="/dashboard/cooperative" />;
+  }
 
   if (!memberships || !cooperatives) {
     return (
@@ -63,6 +76,10 @@ export function CooperativeDashboard() {
           saving.
         </p>
       )}
+
+      <RentToOwnMatches
+        cooperativeIds={memberships.map((m) => m.cooperativeId)}
+      />
 
       {joinable.length > 0 && (
         <div className="mt-10">

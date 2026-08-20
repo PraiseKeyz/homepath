@@ -5,6 +5,7 @@ import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Select } from "@/components/ui/select";
 import { ApiError, register, type UserRole } from "@/lib/api";
 import { setSession } from "@/lib/auth";
@@ -48,7 +49,7 @@ export function RegisterForm() {
         role,
       });
       setSession(accessToken, user);
-      router.push("/dashboard/properties");
+      router.push("/dashboard/cooperative");
       router.refresh();
     } catch (err) {
       setError(
@@ -90,9 +91,8 @@ export function RegisterForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="password">Password</Label>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="new-password"
           required
           minLength={8}

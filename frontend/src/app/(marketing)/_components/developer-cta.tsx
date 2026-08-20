@@ -19,7 +19,7 @@ export function DeveloperCta() {
           variant="secondary"
           className="border-0 bg-background-bg-primary text-text-primary-900 hover:bg-background-bg-primary-hover"
         >
-          <Link href="/register?role=developer">View demand clusters</Link>
+          <Link href="/developers">See how BuildMatch works</Link>
         </Button>
       </div>
     </section>

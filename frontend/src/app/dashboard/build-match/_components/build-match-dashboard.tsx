@@ -1,16 +1,37 @@
 "use client";
 
 import { Building2, Users } from "lucide-react";
-import { useEffect, useState } from "react";
-import { ApiError, type DemandCluster, fetchDemandClusters } from "@/lib/api";
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useState } from "react";
+import { ErrorState } from "@/components/error-state";
+import {
+  ApiError,
+  type DemandCluster,
+  fetchDemandClusters,
+  fetchProperties,
+  type Property,
+} from "@/lib/api";
 import { getStoredUser, getToken } from "@/lib/auth";
+
+const DemandClusterMap = dynamic(
+  () => import("./demand-cluster-map").then((mod) => mod.DemandClusterMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mt-8 flex h-[480px] items-center justify-center rounded-2xl border border-border-secondary bg-background-bg-secondary text-sm text-text-tertiary-600">
+        Loading map…
+      </div>
+    ),
+  },
+);
 
 export function BuildMatchDashboard() {
   const [clusters, setClusters] = useState<DemandCluster[] | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [allowed, setAllowed] = useState<boolean | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     const user = getStoredUser();
     const token = getToken();
     if (!user || !token) return;
@@ -20,15 +41,23 @@ export function BuildMatchDashboard() {
       return;
     }
     setAllowed(true);
+    setError(null);
 
-    fetchDemandClusters(token)
-      .then(setClusters)
+    Promise.all([fetchDemandClusters(token), fetchProperties()])
+      .then(([demandClusters, allProperties]) => {
+        setClusters(demandClusters);
+        setProperties(allProperties);
+      })
       .catch((err) =>
         setError(
           err instanceof ApiError ? err.message : "Something went wrong.",
         ),
       );
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   if (allowed === false) {
     return (
@@ -39,6 +68,10 @@ export function BuildMatchDashboard() {
     );
   }
 
+  if (error) {
+    return <ErrorState onRetry={load} homeHref="/dashboard/cooperative" />;
+  }
+
   return (
     <div className="max-w-3xl">
       <h1 className="text-2xl font-bold text-text-primary-900">BuildMatch</h1>
@@ -47,8 +80,8 @@ export function BuildMatchDashboard() {
         survey estimate.
       </p>
 
-      {error && (
-        <p className="mt-6 text-sm text-text-error-primary-600">{error}</p>
+      {clusters && clusters.length > 0 && (
+        <DemandClusterMap clusters={clusters} properties={properties} />
       )}
 
       {clusters && (
