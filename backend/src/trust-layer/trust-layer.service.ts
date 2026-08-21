@@ -3,9 +3,11 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AiExplanationService } from './ai-explanation.service.js';
 import { SubmitDocumentDto } from './dto/submit-document.dto.js';
 import { SubmitReportDto } from './dto/submit-report.dto.js';
+import { VerifyRegistryDto } from './dto/verify-registry.dto.js';
 import {
   CommunityReportType,
   NotificationType,
+  RegistryStatus,
 } from '../../generated/prisma/index.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 
@@ -88,19 +90,88 @@ export class TrustLayerService {
       );
     }
 
-    const registryRecord = await this.prisma.registryRecord.findUnique({
-      where: {
-        plotNumber_surveyNumber: {
-          plotNumber: document.plotNumber,
-          surveyNumber: document.surveyNumber,
-        },
-      },
-    });
-    const registryStatus = registryRecord?.status ?? 'NOT_FOUND';
+    const registryStatus = await this.lookupRegistryStatus(
+      document.plotNumber,
+      document.surveyNumber,
+    );
 
     const reports = await this.prisma.communityReport.findMany({
       where: { propertyId },
     });
+    const { score, communityAdjustment, explanationText } =
+      await this.scoreAndExplain(registryStatus, reports);
+
+    return this.prisma.trustScore.upsert({
+      where: { propertyId },
+      create: {
+        propertyId,
+        score,
+        registryStatus,
+        communityAdjustment,
+        explanationText,
+      },
+      update: {
+        score,
+        registryStatus,
+        communityAdjustment,
+        explanationText,
+        computedAt: new Date(),
+      },
+    });
+  }
+
+  // Standalone registry check — no listing required. Reuses the exact same
+  // formula as computeTrustScore(); only the sourcing of the two signals
+  // differs (a raw plot/survey pair instead of a property's own document).
+  // See docs/ARCHITECTURE.md §2.1.
+  async verifyByRegistry(dto: VerifyRegistryDto) {
+    const registryStatus = await this.lookupRegistryStatus(
+      dto.plotNumber,
+      dto.surveyNumber,
+    );
+
+    const matchedDocuments = await this.prisma.propertyDocument.findMany({
+      where: { plotNumber: dto.plotNumber, surveyNumber: dto.surveyNumber },
+      include: {
+        property: { select: { id: true, title: true, address: true } },
+      },
+    });
+    const matchedPropertyIds = matchedDocuments.map((d) => d.propertyId);
+
+    const reports = matchedPropertyIds.length
+      ? await this.prisma.communityReport.findMany({
+          where: { propertyId: { in: matchedPropertyIds } },
+        })
+      : [];
+
+    const { score, communityAdjustment, explanationText } =
+      await this.scoreAndExplain(registryStatus, reports);
+
+    return {
+      plotNumber: dto.plotNumber,
+      surveyNumber: dto.surveyNumber,
+      score,
+      registryStatus,
+      communityAdjustment,
+      explanationText,
+      matchedProperties: matchedDocuments.map((d) => d.property),
+    };
+  }
+
+  private async lookupRegistryStatus(
+    plotNumber: string,
+    surveyNumber: string,
+  ): Promise<RegistryStatus | 'NOT_FOUND'> {
+    const registryRecord = await this.prisma.registryRecord.findUnique({
+      where: { plotNumber_surveyNumber: { plotNumber, surveyNumber } },
+    });
+    return registryRecord?.status ?? 'NOT_FOUND';
+  }
+
+  private async scoreAndExplain(
+    registryStatus: RegistryStatus | 'NOT_FOUND',
+    reports: { type: CommunityReportType }[],
+  ) {
     const confirmationCount = reports.filter(
       (r) => r.type === CommunityReportType.CONFIRMATION,
     ).length;
@@ -123,23 +194,7 @@ export class TrustLayerService {
       disputeCount,
     });
 
-    return this.prisma.trustScore.upsert({
-      where: { propertyId },
-      create: {
-        propertyId,
-        score,
-        registryStatus,
-        communityAdjustment,
-        explanationText,
-      },
-      update: {
-        score,
-        registryStatus,
-        communityAdjustment,
-        explanationText,
-        computedAt: new Date(),
-      },
-    });
+    return { score, communityAdjustment, explanationText };
   }
 
   private async assertPropertyExists(propertyId: string) {
