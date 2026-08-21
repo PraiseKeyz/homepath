@@ -104,17 +104,17 @@ function GalleryModal({
   const RoomIcon = ROOM_ICONS[idx] ?? Home;
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-black">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-white">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
         <button
           type="button"
           onClick={onClose}
-          className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition"
+          className="flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition"
         >
           <X className="h-4 w-4" /> Close
         </button>
-        <span className="text-sm font-medium text-white/60">
+        <span className="text-sm font-medium text-gray-400">
           {idx + 1} / {images.length}
         </span>
       </div>
@@ -124,7 +124,7 @@ function GalleryModal({
         <button
           type="button"
           onClick={prev}
-          className="absolute left-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/25 transition"
+          className="absolute left-4 flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow hover:bg-gray-50 transition"
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
@@ -133,21 +133,21 @@ function GalleryModal({
           key={idx}
           src={images[idx]}
           alt={ROOM_LABELS[idx] ?? `Photo ${idx + 1}`}
-          className="max-h-[75vh] max-w-full rounded-2xl object-contain shadow-2xl"
+          className="max-h-[75vh] max-w-full rounded-2xl object-contain shadow-xl ring-1 ring-gray-100"
         />
 
         <button
           type="button"
           onClick={next}
-          className="absolute right-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/25 transition"
+          className="absolute right-4 flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow hover:bg-gray-50 transition"
         >
           <ChevronRight className="h-6 w-6" />
         </button>
       </div>
 
       {/* Room label + thumbnail strip */}
-      <div className="pb-6 pt-4">
-        <p className="mb-3 flex items-center justify-center gap-2 text-sm font-medium text-white/70">
+      <div className="border-t border-gray-100 pb-6 pt-4">
+        <p className="mb-3 flex items-center justify-center gap-2 text-sm font-medium text-gray-500">
           <RoomIcon className="h-4 w-4" />
           {ROOM_LABELS[idx] ?? `Photo ${idx + 1}`}
         </p>
@@ -159,8 +159,8 @@ function GalleryModal({
               onClick={() => setIdx(i)}
               className={`shrink-0 overflow-hidden rounded-lg transition-all ${
                 i === idx
-                  ? "ring-2 ring-white ring-offset-2 ring-offset-black"
-                  : "opacity-50 hover:opacity-80"
+                  ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-white"
+                  : "opacity-40 hover:opacity-70"
               }`}
             >
               <img src={src} alt={ROOM_LABELS[i] ?? ""} className="h-14 w-20 object-cover" />
@@ -588,15 +588,15 @@ export default function PropertyDetailPage() {
             <div className="lg:sticky lg:top-[65px] lg:self-start">
               <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl">
                 {/* Price */}
-                <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 text-white">
-                  <p className="text-sm font-medium text-indigo-200">
+                <div className="bg-gradient-to-br from-indigo-50 to-violet-50 p-6">
+                  <p className="text-sm font-semibold uppercase tracking-widest text-indigo-400">
                     {property.listingType === "RENT" ? "Annual Rent" : "Sale Price"}
                   </p>
-                  <p className="mt-1 text-4xl font-black tracking-tight">
+                  <p className="mt-1 text-4xl font-black tracking-tight text-gray-900">
                     {formatPrice(property.price, property.listingType)}
                   </p>
                   {property.listingType === "RENT" && (
-                    <p className="mt-1 text-sm text-indigo-200">
+                    <p className="mt-1 text-sm text-gray-400">
                       ≈ ₦{monthlyPrice.toLocaleString()} / month
                     </p>
                   )}

@@ -134,7 +134,7 @@ function PropertyCard({
 
         {/* Price on image bottom */}
         <div className="absolute bottom-3 left-3">
-          <span className="rounded-lg bg-black/70 px-2.5 py-1 text-sm font-bold text-white backdrop-blur-sm">
+          <span className="rounded-lg bg-white/90 px-2.5 py-1 text-sm font-bold text-gray-900 shadow backdrop-blur-sm">
             {formatPrice(property.price, property.listingType)}
           </span>
         </div>
