@@ -29,7 +29,7 @@ plain English:
 |---|---|---|
 | Registry match | Look up the user-attested plot/survey number against a records table | Deterministic DB query |
 | Community reports | Count and weight crowdsourced dispute/confirmation flags | Deterministic aggregation |
-| Explanation | Turn the two signals above into a readable summary + disclaimer | Claude API (narration only) |
+| Explanation | Turn the two signals above into a readable summary + disclaimer | Gemini API (narration only) |
 
 Document photos are stored for reference but **never parsed by AI**. The user reads their own
 document and types in the fields (plot number, survey number, owner name). This removes an entire
@@ -84,7 +84,7 @@ the credibility story.
 | ORM | Prisma | Migrations + type-safe queries against Postgres |
 | Database | PostgreSQL, self-hosted via Docker | No managed BaaS; own auth |
 | Auth | Email/password, bcrypt, role field on `User` | No need for full IAM in a hackathon |
-| AI | Claude API | Scoped to Trust Score explanation text only — see §2 |
+| AI | Gemini API | Scoped to Trust Score explanation text only — see §2 |
 | Maps | Google Maps + Places API | Real integration — cheap to wire in, demos well |
 | WhatsApp/USSD | Simulated web UI mimicking the flow | Real Twilio/Africa's Talking integration only if time remains |
 

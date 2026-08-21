@@ -149,6 +149,30 @@ export function fetchUser(id: string) {
   return apiFetch<User>(`/users/${id}`);
 }
 
+export function updateProfile(
+  id: string,
+  token: string,
+  input: { name?: string; phone?: string },
+) {
+  return apiFetch<User>(`/users/${id}`, {
+    method: "PATCH",
+    headers: authHeader(token),
+    body: JSON.stringify(input),
+  });
+}
+
+export function changePassword(
+  id: string,
+  token: string,
+  input: { currentPassword: string; newPassword: string },
+) {
+  return apiFetch<{ success: boolean }>(`/users/${id}/password`, {
+    method: "PATCH",
+    headers: authHeader(token),
+    body: JSON.stringify(input),
+  });
+}
+
 export function fetchLandlordProfile(id: string) {
   return apiFetch<LandlordProfile>(`/users/${id}/profile`);
 }
@@ -334,6 +358,119 @@ export interface NeighbourhoodData {
 
 export function fetchNeighbourhood(areaKey: string) {
   return apiFetch<NeighbourhoodData>(`/neighbourhood/${areaKey}`);
+}
+
+export function fetchAllNeighbourhoods() {
+  return apiFetch<NeighbourhoodData[]>("/neighbourhood");
+}
+
+export interface ConversationParticipant {
+  id: string;
+  conversationId: string;
+  userId: string;
+  user: User;
+}
+
+export interface ConversationMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  body: string;
+  createdAt: string;
+  sender: User;
+}
+
+export interface Conversation {
+  id: string;
+  propertyId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  property?: {
+    id: string;
+    title: string;
+    address: string;
+    imageUrl: string | null;
+  } | null;
+  participants: ConversationParticipant[];
+  messages: ConversationMessage[];
+}
+
+export function createConversation(propertyId: string, token: string) {
+  return apiFetch<Conversation>("/conversations", {
+    method: "POST",
+    headers: authHeader(token),
+    body: JSON.stringify({ propertyId }),
+  });
+}
+
+export function fetchMyConversations(token: string) {
+  return apiFetch<Conversation[]>("/conversations", {
+    headers: authHeader(token),
+  });
+}
+
+export function fetchConversationMessages(
+  conversationId: string,
+  token: string,
+) {
+  return apiFetch<ConversationMessage[]>(
+    `/conversations/${conversationId}/messages`,
+    {
+      headers: authHeader(token),
+    },
+  );
+}
+
+export function sendConversationMessage(
+  conversationId: string,
+  token: string,
+  body: string,
+) {
+  return apiFetch<ConversationMessage>(
+    `/conversations/${conversationId}/messages`,
+    {
+      method: "POST",
+      headers: authHeader(token),
+      body: JSON.stringify({ body }),
+    },
+  );
+}
+
+export type NotificationType =
+  | "MATCH_ACCEPTED"
+  | "MATCH_DECLINED"
+  | "RATING_RECEIVED"
+  | "COMMUNITY_REPORT_FILED"
+  | "NEW_MESSAGE";
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export function fetchNotifications(token: string) {
+  return apiFetch<AppNotification[]>("/notifications", {
+    headers: authHeader(token),
+  });
+}
+
+export function markNotificationRead(id: string, token: string) {
+  return apiFetch<AppNotification>(`/notifications/${id}/read`, {
+    method: "PATCH",
+    headers: authHeader(token),
+  });
+}
+
+export function markAllNotificationsRead(token: string) {
+  return apiFetch<{ success: boolean }>("/notifications/read-all", {
+    method: "PATCH",
+    headers: authHeader(token),
+  });
 }
 
 // ── Saved Properties (localStorage) ─────────────────────────────────────────

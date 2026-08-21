@@ -2,25 +2,14 @@
 
 import { Droplets, MapPinned, ShieldAlert, Zap } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { fetchNeighbourhood, type NeighbourhoodData } from "@/lib/api";
+import { useCallback, useEffect, useState } from "react";
+import { ErrorState } from "@/components/error-state";
+import {
+  ApiError,
+  fetchAllNeighbourhoods,
+  type NeighbourhoodData,
+} from "@/lib/api";
 import { formatAreaKey } from "@/lib/format";
-
-// No "list all areas" endpoint exists yet — this is the known seeded set from
-// prisma/seed.ts, fetched one at a time via the existing single-area lookup.
-const AREA_KEYS = [
-  "ojodu",
-  "lekki",
-  "ikoyi",
-  "victoria-island",
-  "ajah",
-  "gbagada",
-  "ikeja",
-  "magodo",
-  "mowe-ofada",
-  "surulere",
-  "yaba",
-];
 
 function scoreLabel(score: number) {
   if (score >= 70) return "Good";
@@ -99,14 +88,24 @@ function AreaCard({ data }: { data: NeighbourhoodData }) {
 
 export function NeighbourhoodsDirectory() {
   const [areas, setAreas] = useState<NeighbourhoodData[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setError(null);
+    try {
+      setAreas(await fetchAllNeighbourhoods());
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Something went wrong.");
+    }
+  }, []);
 
   useEffect(() => {
-    Promise.all(
-      AREA_KEYS.map((key) => fetchNeighbourhood(key).catch(() => null)),
-    ).then((results) =>
-      setAreas(results.filter((r): r is NeighbourhoodData => r !== null)),
-    );
-  }, []);
+    load();
+  }, [load]);
+
+  if (error) {
+    return <ErrorState onRetry={load} homeHref="/dashboard" />;
+  }
 
   return (
     <div className="max-w-6xl">

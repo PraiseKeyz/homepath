@@ -1,16 +1,24 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as argon2 from 'argon2';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SafeUserSelect } from '../common/constants/safe-user.constant.js';
 import { CreateLandlordRatingDto } from './dto/create-landlord-rating.dto.js';
-import { UserRole } from '../../generated/prisma/index.js';
+import { UpdateProfileDto } from './dto/update-profile.dto.js';
+import { ChangePasswordDto } from './dto/change-password.dto.js';
+import { UserRole, NotificationType } from '../../generated/prisma/index.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async findById(id: string) {
     const user = await this.prisma.user.findUnique({
@@ -19,6 +27,46 @@ export class UsersService {
     });
     if (!user) throw new NotFoundException('User not found');
     return user;
+  }
+
+  async updateProfile(
+    id: string,
+    requestingUserId: string,
+    dto: UpdateProfileDto,
+  ) {
+    if (id !== requestingUserId) {
+      throw new ForbiddenException('You can only edit your own profile');
+    }
+    return this.prisma.user.update({
+      where: { id },
+      data: dto,
+      select: SafeUserSelect,
+    });
+  }
+
+  async changePassword(
+    id: string,
+    requestingUserId: string,
+    dto: ChangePasswordDto,
+  ) {
+    if (id !== requestingUserId) {
+      throw new ForbiddenException('You can only change your own password');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const currentValid = await argon2.verify(
+      user.password,
+      dto.currentPassword,
+    );
+    if (!currentValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    const password = await argon2.hash(dto.newPassword);
+    await this.prisma.user.update({ where: { id }, data: { password } });
+    return { success: true };
   }
 
   // Landlord rating system (docs/ARCHITECTURE.md §5, "in scope, simulated" —
@@ -41,9 +89,19 @@ export class UsersService {
       throw new BadRequestException('Only landlord accounts can be rated');
     }
 
-    return this.prisma.landlordRating.create({
+    const rating = await this.prisma.landlordRating.create({
       data: { landlordId, raterId, rating: dto.rating, comment: dto.comment },
     });
+
+    const rater = await this.prisma.user.findUnique({ where: { id: raterId } });
+    await this.notificationsService.create(
+      landlordId,
+      NotificationType.RATING_RECEIVED,
+      'New rating received',
+      `${rater?.name ?? 'Someone'} rated you ${dto.rating}/5${dto.comment ? `: "${dto.comment}"` : '.'}`,
+    );
+
+    return rating;
   }
 
   async findLandlordRatings(landlordId: string) {

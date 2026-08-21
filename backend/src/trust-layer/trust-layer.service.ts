@@ -3,7 +3,11 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AiExplanationService } from './ai-explanation.service.js';
 import { SubmitDocumentDto } from './dto/submit-document.dto.js';
 import { SubmitReportDto } from './dto/submit-report.dto.js';
-import { CommunityReportType } from '../../generated/prisma/index.js';
+import {
+  CommunityReportType,
+  NotificationType,
+} from '../../generated/prisma/index.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 // The Trust Score formula from docs/ARCHITECTURE.md §2.1. It is a deterministic
 // composite of two independently-checkable signals — registry match and
@@ -29,6 +33,7 @@ export class TrustLayerService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiExplanationService: AiExplanationService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async submitDocument(
@@ -49,8 +54,12 @@ export class TrustLayerService {
     reporterId: string,
     dto: SubmitReportDto,
   ) {
-    await this.assertPropertyExists(propertyId);
-    return this.prisma.communityReport.create({
+    const property = await this.prisma.property.findUnique({
+      where: { id: propertyId },
+    });
+    if (!property) throw new NotFoundException('Property not found');
+
+    const report = await this.prisma.communityReport.create({
       data: {
         propertyId,
         reporterId,
@@ -58,6 +67,15 @@ export class TrustLayerService {
         description: dto.description,
       },
     });
+
+    await this.notificationsService.create(
+      property.ownerId,
+      NotificationType.COMMUNITY_REPORT_FILED,
+      'New community report on your listing',
+      `A ${dto.type.toLowerCase().replace('_', ' ')} report was filed on "${property.title}".`,
+    );
+
+    return report;
   }
 
   async computeTrustScore(propertyId: string) {

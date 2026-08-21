@@ -16,12 +16,14 @@ function NavRow({
   label,
   Icon,
   isActive,
+  badge,
   onNavigate,
 }: {
   href: string;
   label: string;
   Icon: (typeof DASHBOARD_NAV_ITEMS)[number]["icon"];
   isActive: boolean;
+  badge?: number;
   onNavigate?: () => void;
 }) {
   return (
@@ -38,7 +40,12 @@ function NavRow({
         <span className="absolute top-1/2 left-0 h-4 w-1 -translate-y-1/2 rounded-r-full bg-button-primary-default" />
       )}
       <Icon className="h-4 w-4" />
-      {label}
+      <span className="flex-1">{label}</span>
+      {!!badge && (
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-utility-error-500 px-1.5 text-[11px] font-bold text-text-white">
+          {badge > 9 ? "9+" : badge}
+        </span>
+      )}
     </Link>
   );
 }
@@ -52,6 +59,7 @@ function SidebarContent({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { unreadCount } = useDashboardShell();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -119,6 +127,11 @@ function SidebarContent({
               Icon={item.icon}
               isActive={
                 pathname === item.href || pathname.startsWith(`${item.href}/`)
+              }
+              badge={
+                item.href === "/dashboard/notifications"
+                  ? unreadCount
+                  : undefined
               }
               onNavigate={onNavigate}
             />

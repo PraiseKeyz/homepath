@@ -5,6 +5,12 @@ import { PrismaService } from '../prisma/prisma.service.js';
 export class NeighbourhoodService {
   constructor(private readonly prisma: PrismaService) {}
 
+  findAll() {
+    return this.prisma.neighbourhoodData.findMany({
+      orderBy: { areaKey: 'asc' },
+    });
+  }
+
   async findByAreaKey(areaKey: string) {
     const data = await this.prisma.neighbourhoodData.findUnique({
       where: { areaKey },

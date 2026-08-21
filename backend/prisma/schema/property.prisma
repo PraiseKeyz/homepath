@@ -33,6 +33,7 @@ model Property {
   communityReports CommunityReport[]
   trustScore       TrustScore?
   rentToOwnMatches RentToOwnMatch[]
+  conversations    Conversation[]
 
   @@index([areaKey])
 }

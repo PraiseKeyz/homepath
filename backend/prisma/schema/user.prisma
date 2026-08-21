@@ -21,4 +21,7 @@ model User {
   cooperativeMemberships  CooperativeMembership[]
   ratingsGiven            LandlordRating[]          @relation("RatingAuthor")
   ratingsReceived         LandlordRating[]          @relation("RatingTarget")
+  conversationsIn         ConversationParticipant[]
+  messagesSent            Message[]
+  notifications           Notification[]
 }
