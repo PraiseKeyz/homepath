@@ -241,32 +241,6 @@ export interface CooperativeMembership {
   contributions: Contribution[];
 }
 
-export interface Payment {
-  id: string;
-  userId: string;
-  membershipId: string;
-  amount: string;
-  currency: string;
-  txRef: string;
-  checkoutUrl: string | null;
-  providerTxId: string | null;
-  status: "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
-  createdAt: string;
-  updatedAt: string;
-  membership?: CooperativeMembership | null;
-}
-
-export interface InitializePaymentResponse {
-  paymentId: string;
-  checkoutUrl: string;
-  txRef: string;
-}
-
-export interface VerifyPaymentRequest {
-  transactionId: string;
-  txRef: string;
-}
-
 export interface DemandCluster {
   cooperativeId: string;
   name: string;
@@ -309,31 +283,6 @@ export function joinCooperative(
 
 export function fetchDemandClusters(token: string) {
   return apiFetch<DemandCluster[]>("/cooperatives/demand-clusters", {
-    headers: authHeader(token),
-  });
-}
-
-export function initializePayment(
-  token: string,
-  input: { membershipId: string; amount: number },
-) {
-  return apiFetch<InitializePaymentResponse>("/payments/initialize", {
-    method: "POST",
-    headers: authHeader(token),
-    body: JSON.stringify(input),
-  });
-}
-
-export function verifyPayment(token: string, input: VerifyPaymentRequest) {
-  return apiFetch<Payment>("/payments/verify", {
-    method: "POST",
-    headers: authHeader(token),
-    body: JSON.stringify(input),
-  });
-}
-
-export function fetchPaymentHistory(token: string) {
-  return apiFetch<Payment[]>("/payments/history", {
     headers: authHeader(token),
   });
 }
