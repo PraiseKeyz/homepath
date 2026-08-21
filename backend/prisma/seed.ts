@@ -3,9 +3,52 @@
 // flood/power/security data source — see docs/ARCHITECTURE.md §2.1 and §5.
 import 'dotenv/config';
 import * as argon2 from 'argon2';
-import { PrismaClient, UserRole, RegistryStatus } from '../generated/prisma/index.js';
+import {
+  PrismaClient,
+  UserRole,
+  RegistryStatus,
+  CommunityReportType,
+  RentToOwnStatus,
+  NotificationType,
+} from '../generated/prisma/index.js';
 
 const prisma = new PrismaClient();
+
+const REGISTRY_BASE_SCORE: Record<RegistryStatus | 'NOT_FOUND', number> = {
+  CLEAN: 85,
+  FLAGGED: 15,
+  DISPUTED: 15,
+  NOT_FOUND: 50,
+};
+const CONFIRMATION_WEIGHT = 3;
+const CONFIRMATION_CAP = 10;
+const DISPUTE_WEIGHT = 8;
+const DISPUTE_CAP = 40;
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function fallbackExplanation(
+  score: number,
+  registryStatus: RegistryStatus | 'NOT_FOUND',
+  confirmationCount: number,
+  disputeCount: number,
+) {
+  const registryLine =
+    registryStatus === 'CLEAN'
+      ? 'This plot matches a clean registry record.'
+      : registryStatus === 'NOT_FOUND'
+        ? 'No registry record was found for this plot — this means unverified, not clean.'
+        : 'This plot matches a flagged or disputed registry record.';
+  const communityLine =
+    confirmationCount === 0 && disputeCount === 0
+      ? 'No community reports have been filed yet.'
+      : `${confirmationCount} confirmation report(s) and ${disputeCount} dispute/fraud report(s) have been filed by the community.`;
+  const disclaimer =
+    'This score is not legal proof of ownership. We recommend independent legal or survey verification before making any payment.';
+  return `Trust Score: ${score}/100. ${registryLine} ${communityLine} ${disclaimer}`;
+}
 
 // ── Curated room image sets ─────────────────────────────────────────────────
 // Each set: [exterior, kitchen, bathroom, bedroom, living-room, surroundings]
@@ -159,12 +202,30 @@ async function main() {
     update: {},
   });
 
+  const agent = await prisma.user.upsert({
+    where: { email: 'ngozi@example.com' },
+    create: { name: 'Ngozi Balogun', email: 'ngozi@example.com', password, role: UserRole.AGENT },
+    update: {},
+  });
+
   // ── Registry Records ──────────────────────────────────────────────────────
+  // A believable mix of statuses (mostly CLEAN, a couple FLAGGED/DISPUTED) so
+  // the property map's Trust Heatmap and Verify Property have real variety to
+  // check against — see docs/ARCHITECTURE.md §2.1. Yaba deliberately has no
+  // matching record here, to seed a real NOT_FOUND ("Unverified") example.
   const registryRecords = [
     { plotNumber: 'PL-OJODU-001', surveyNumber: 'SV-2201', status: RegistryStatus.CLEAN, notes: 'Registered owner matches survey office records.' },
     { plotNumber: 'PL-MOWE-014', surveyNumber: 'SV-4410', status: RegistryStatus.DISPUTED, notes: 'Boundary dispute reported by two neighbouring families.' },
     { plotNumber: 'PL-LEKKI-019', surveyNumber: 'SV-7701', status: RegistryStatus.CLEAN, notes: 'Verified C of O, no encumbrances.' },
     { plotNumber: 'PL-IKOYI-033', surveyNumber: 'SV-9901', status: RegistryStatus.CLEAN, notes: 'Clean title, survey matches Lagos State records.' },
+    { plotNumber: 'PL-VI-002', surveyNumber: 'SV-3302', status: RegistryStatus.CLEAN, notes: 'Clean title, verified against Lagos State land registry.' },
+    { plotNumber: 'PL-IKEJA-GRA-007', surveyNumber: 'SV-5507', status: RegistryStatus.CLEAN, notes: 'Registered owner matches survey office records.' },
+    { plotNumber: 'PL-SURULERE-021', surveyNumber: 'SV-2121', status: RegistryStatus.CLEAN, notes: 'Clean title, no encumbrances found.' },
+    { plotNumber: 'PL-AJAH-045', surveyNumber: 'SV-4545', status: RegistryStatus.CLEAN, notes: 'Verified estate allocation, clean title.' },
+    { plotNumber: 'PL-GBAGADA-013', surveyNumber: 'SV-1313', status: RegistryStatus.DISPUTED, notes: 'Conflicting claims from two purported owners under investigation.' },
+    { plotNumber: 'PL-MAGODO-008', surveyNumber: 'SV-0808', status: RegistryStatus.CLEAN, notes: 'Registered owner matches survey office records.' },
+    { plotNumber: 'PL-LEKKI2-055', surveyNumber: 'SV-5505', status: RegistryStatus.FLAGGED, notes: 'Outstanding ground rent flagged by the land bureau.' },
+    { plotNumber: 'PL-VIOFFICE-012', surveyNumber: 'SV-1212', status: RegistryStatus.CLEAN, notes: 'Clean title, verified C of O.' },
   ];
   for (const r of registryRecords) {
     await prisma.registryRecord.upsert({
@@ -192,7 +253,7 @@ async function main() {
   }
 
   // ── Properties ────────────────────────────────────────────────────────────
-  const property = await prisma.property.upsert({
+  await prisma.property.upsert({
     where: { id: 'demo-property-ojodu' },
     create: {
       id: 'demo-property-ojodu',
@@ -416,18 +477,96 @@ async function main() {
     update: {},
   });
 
-  // ── Property Document ─────────────────────────────────────────────────────
-  await prisma.propertyDocument.upsert({
-    where: { propertyId: property.id },
-    create: {
-      propertyId: property.id,
-      submittedById: landlord.id,
-      plotNumber: 'PL-OJODU-001',
-      surveyNumber: 'SV-2201',
-      attestedOwnerName: 'Chidi Eze',
-      documentType: 'Certificate of Occupancy',
-    },
-    update: {},
+  // ── Property Documents ─────────────────────────────────────────────────────
+  // Self-attested by each property's own owner — 13 of 14 properties get one,
+  // 'demo-property-ikeja-mini' deliberately doesn't, so the map/Verify Property
+  // also show a real "not yet checked" example alongside the checked ones.
+  const documents = [
+    { propertyId: 'demo-property-ojodu', ownerId: landlord.id, ownerName: 'Chidi Eze', plotNumber: 'PL-OJODU-001', surveyNumber: 'SV-2201' },
+    { propertyId: 'demo-property-mowe', ownerId: landlord.id, ownerName: 'Chidi Eze', plotNumber: 'PL-MOWE-014', surveyNumber: 'SV-4410' },
+    { propertyId: 'demo-property-lekki', ownerId: developer.id, ownerName: 'Lekki Homes Ltd', plotNumber: 'PL-LEKKI-019', surveyNumber: 'SV-7701' },
+    { propertyId: 'demo-property-ikoyi-mansion', ownerId: developer.id, ownerName: 'Lekki Homes Ltd', plotNumber: 'PL-IKOYI-033', surveyNumber: 'SV-9901' },
+    { propertyId: 'demo-property-vi-penthouse', ownerId: developer.id, ownerName: 'Lekki Homes Ltd', plotNumber: 'PL-VI-002', surveyNumber: 'SV-3302' },
+    { propertyId: 'demo-property-ikeja-3bed', ownerId: landlord2.id, ownerName: 'Funke Adeyemi', plotNumber: 'PL-IKEJA-GRA-007', surveyNumber: 'SV-5507' },
+    // No matching RegistryRecord for this one — a real, seeded NOT_FOUND example.
+    { propertyId: 'demo-property-yaba-studio', ownerId: landlord2.id, ownerName: 'Funke Adeyemi', plotNumber: 'PL-YABA-099', surveyNumber: 'SV-8899' },
+    { propertyId: 'demo-property-surulere-2bed', ownerId: landlord.id, ownerName: 'Chidi Eze', plotNumber: 'PL-SURULERE-021', surveyNumber: 'SV-2121' },
+    { propertyId: 'demo-property-ajah-terrace', ownerId: developer2.id, ownerName: 'Tayo Realty Group', plotNumber: 'PL-AJAH-045', surveyNumber: 'SV-4545' },
+    { propertyId: 'demo-property-gbagada-4bed', ownerId: landlord2.id, ownerName: 'Funke Adeyemi', plotNumber: 'PL-GBAGADA-013', surveyNumber: 'SV-1313' },
+    { propertyId: 'demo-property-magodo-2bed', ownerId: developer2.id, ownerName: 'Tayo Realty Group', plotNumber: 'PL-MAGODO-008', surveyNumber: 'SV-0808' },
+    { propertyId: 'demo-property-lekki2-5bed', ownerId: developer.id, ownerName: 'Lekki Homes Ltd', plotNumber: 'PL-LEKKI2-055', surveyNumber: 'SV-5505' },
+    { propertyId: 'demo-property-vi-office', ownerId: developer2.id, ownerName: 'Tayo Realty Group', plotNumber: 'PL-VIOFFICE-012', surveyNumber: 'SV-1212' },
+  ];
+  for (const d of documents) {
+    await prisma.propertyDocument.upsert({
+      where: { propertyId: d.propertyId },
+      create: {
+        propertyId: d.propertyId,
+        submittedById: d.ownerId,
+        plotNumber: d.plotNumber,
+        surveyNumber: d.surveyNumber,
+        attestedOwnerName: d.ownerName,
+        documentType: 'Certificate of Occupancy',
+      },
+      update: {},
+    });
+  }
+
+  // ── Community Reports ─────────────────────────────────────────────────────
+  // Real crowdsourced signals feeding into the score's community_adjustment —
+  // a mix of confirmations and disputes/fraud flags, see docs/ARCHITECTURE.md §2.1.
+  const communityReports: {
+    propertyId: string;
+    reporterId: string;
+    type: CommunityReportType;
+    description: string;
+  }[] = [
+    { propertyId: 'demo-property-ojodu', reporterId: developer.id, type: CommunityReportType.CONFIRMATION, description: 'I visited this property — matches the listing and the landlord was transparent about the title.' },
+    { propertyId: 'demo-property-lekki', reporterId: buyer.id, type: CommunityReportType.CONFIRMATION, description: 'Confirmed with the estate office — this unit is genuinely available and the developer is reputable.' },
+    { propertyId: 'demo-property-gbagada-4bed', reporterId: buyer.id, type: CommunityReportType.FRAUD_FLAG, description: 'A second family showed up claiming ownership of this plot during a site visit.' },
+    { propertyId: 'demo-property-lekki2-5bed', reporterId: landlord2.id, type: CommunityReportType.DISPUTE, description: 'Neighbours mentioned unresolved ground rent owed on this property.' },
+  ];
+  for (const r of communityReports) {
+    await prisma.communityReport.create({
+      data: { propertyId: r.propertyId, reporterId: r.reporterId, type: r.type, description: r.description },
+    });
+  }
+
+  // ── Trust Scores ───────────────────────────────────────────────────────────
+  // Computed with the real formula from real seeded registry/community data —
+  // not fabricated. Explanation text uses the same fallback wording the app
+  // itself falls back to; the frontend recomputes (and gets a live Gemini
+  // narration) the first time anyone opens that property's detail page.
+  for (const d of documents) {
+    const registryRecord = await prisma.registryRecord.findUnique({
+      where: { plotNumber_surveyNumber: { plotNumber: d.plotNumber, surveyNumber: d.surveyNumber } },
+    });
+    const registryStatus = registryRecord?.status ?? 'NOT_FOUND';
+    const reports = communityReports.filter((r) => r.propertyId === d.propertyId);
+    const confirmationCount = reports.filter((r) => r.type === CommunityReportType.CONFIRMATION).length;
+    const disputeCount = reports.filter(
+      (r) => r.type === CommunityReportType.DISPUTE || r.type === CommunityReportType.FRAUD_FLAG,
+    ).length;
+    const base = REGISTRY_BASE_SCORE[registryStatus];
+    const communityAdjustment =
+      Math.min(CONFIRMATION_WEIGHT * confirmationCount, CONFIRMATION_CAP) -
+      Math.min(DISPUTE_WEIGHT * disputeCount, DISPUTE_CAP);
+    const score = clamp(base + communityAdjustment, 0, 100);
+    const explanationText = fallbackExplanation(score, registryStatus, confirmationCount, disputeCount);
+
+    await prisma.trustScore.upsert({
+      where: { propertyId: d.propertyId },
+      create: { propertyId: d.propertyId, score, registryStatus, communityAdjustment, explanationText },
+      update: { score, registryStatus, communityAdjustment, explanationText },
+    });
+  }
+
+  // ── Landlord Ratings ───────────────────────────────────────────────────────
+  await prisma.landlordRating.create({
+    data: { landlordId: landlord.id, raterId: buyer.id, rating: 5, comment: 'Great landlord, very responsive and the property matched exactly what was described.' },
+  });
+  await prisma.landlordRating.create({
+    data: { landlordId: landlord2.id, raterId: buyer.id, rating: 4, comment: 'Good experience overall, minor delay in response time.' },
   });
 
   // ── Cooperatives ──────────────────────────────────────────────────────────
@@ -460,13 +599,80 @@ async function main() {
   await seedContributions(buyerMembership.id, 18000, 6);
   await seedContributions(landlordMembership.id, 15000, 3);
 
+  // ── Rent-to-Own Matches ────────────────────────────────────────────────────
+  // One accepted match (so the dashboard's "Active Rent-to-Own Deal" card has
+  // something real to show) and one still-proposed match (so the cooperative
+  // page's accept/decline flow has something to respond to).
+  await prisma.rentToOwnMatch.upsert({
+    where: { id: 'demo-match-mowe-accepted' },
+    create: {
+      id: 'demo-match-mowe-accepted',
+      cooperativeId: cooperative.id,
+      propertyId: 'demo-property-mowe',
+      status: RentToOwnStatus.ACCEPTED,
+    },
+    update: { status: RentToOwnStatus.ACCEPTED },
+  });
+
+  await prisma.rentToOwnMatch.upsert({
+    where: { id: 'demo-match-ojodu-proposed' },
+    create: {
+      id: 'demo-match-ojodu-proposed',
+      cooperativeId: ojoduCooperative.id,
+      propertyId: 'demo-property-surulere-2bed',
+      status: RentToOwnStatus.PROPOSED,
+    },
+    update: {},
+  });
+
+  // ── Notifications ──────────────────────────────────────────────────────────
+  // Only ever created from the real events seeded above — matches the rule
+  // that notifications are never a standalone/simulated feed.
+  await prisma.notification.create({
+    data: {
+      userId: landlord.id,
+      type: NotificationType.MATCH_ACCEPTED,
+      title: 'Rent-to-own match accepted',
+      body: `Mowe-Ofada 2-Bedroom Savers accepted your match for "3-Bedroom Duplex, Mowe Ofada".`,
+    },
+  });
+  await prisma.notification.create({
+    data: {
+      userId: landlord.id,
+      type: NotificationType.RATING_RECEIVED,
+      title: 'New rating received',
+      body: 'Ada Obi rated you 5/5: "Great landlord, very responsive and the property matched exactly what was described."',
+    },
+  });
+  await prisma.notification.create({
+    data: {
+      userId: landlord2.id,
+      type: NotificationType.RATING_RECEIVED,
+      title: 'New rating received',
+      body: 'Ada Obi rated you 4/5: "Good experience overall, minor delay in response time."',
+    },
+  });
+  await prisma.notification.create({
+    data: {
+      userId: landlord2.id,
+      type: NotificationType.COMMUNITY_REPORT_FILED,
+      title: 'New community report on your listing',
+      body: 'A fraud flag report was filed on "4-Bedroom Detached, Gbagada Phase 2".',
+    },
+  });
   console.log('Seed complete:', {
     buyer: buyer.email,
     landlord: landlord.email,
     landlord2: landlord2.email,
     developer: developer.email,
     developer2: developer2.email,
+    agent: agent.email,
     properties: 14,
+    documentedProperties: documents.length,
+    communityReports: communityReports.length,
+    landlordRatings: 2,
+    rentToOwnMatches: 2,
+    notifications: 4,
   });
 }
 

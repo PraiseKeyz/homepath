@@ -418,6 +418,23 @@ export function fetchAllNeighbourhoods() {
   return apiFetch<NeighbourhoodData[]>("/neighbourhood");
 }
 
+export interface RegistryVerification {
+  plotNumber: string;
+  surveyNumber: string;
+  score: number;
+  registryStatus: RegistryStatus;
+  communityAdjustment: number;
+  explanationText: string;
+  matchedProperties: { id: string; title: string; address: string }[];
+}
+
+export function verifyRegistry(plotNumber: string, surveyNumber: string) {
+  return apiFetch<RegistryVerification>("/trust-layer/verify", {
+    method: "POST",
+    body: JSON.stringify({ plotNumber, surveyNumber }),
+  });
+}
+
 export interface ConversationParticipant {
   id: string;
   conversationId: string;
