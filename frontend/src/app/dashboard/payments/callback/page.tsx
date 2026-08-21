@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { ApiError, verifyPayment } from "@/lib/api";
+import { ApiError, cancelPayment, verifyPayment } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 
 export default function PaymentCallbackPage() {
@@ -20,19 +20,26 @@ export default function PaymentCallbackPage() {
     const transactionId = searchParams.get("transaction_id");
     const txRef = searchParams.get("tx_ref");
 
-    if (!transactionId || !txRef) {
-      router.replace("/dashboard/payments/failed?reason=missing_params");
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
       return;
     }
 
     if (status === "cancelled") {
+      if (txRef) {
+        try {
+          await cancelPayment(token, { txRef });
+        } catch {
+          // The user-facing outcome is still cancellation; history can be retried later.
+        }
+      }
       router.replace("/dashboard/payments/failed?reason=cancelled");
       return;
     }
 
-    const token = getToken();
-    if (!token) {
-      router.replace("/login");
+    if (!transactionId || !txRef) {
+      router.replace("/dashboard/payments/failed?reason=missing_params");
       return;
     }
 

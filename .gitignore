@@ -4,3 +4,4 @@ node_modules/
 HomePath_Team_Brief.md
 .claude
 graphify-out/
+.pnpm-store/

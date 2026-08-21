@@ -6,6 +6,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service.js';
+import { CancelPaymentDto } from './dto/cancel-payment.dto.js';
 import { InitializePaymentDto } from './dto/initialize-payment.dto.js';
 import { VerifyPaymentDto } from './dto/verify-payment.dto.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
@@ -39,7 +40,18 @@ export class PaymentsController {
       data: await this.paymentsService.verifyAndFulfill(
         dto.transactionId,
         dto.txRef,
+        user.id,
       ),
+    };
+  }
+
+  @Post('cancel')
+  async cancel(
+    @CurrentUser() user: SafeUser,
+    @Body() dto: CancelPaymentDto,
+  ) {
+    return {
+      data: await this.paymentsService.cancelPayment(user.id, dto.txRef),
     };
   }
 

@@ -360,7 +360,6 @@ export function fetchNeighbourhood(areaKey: string) {
   return apiFetch<NeighbourhoodData>(`/neighbourhood/${areaKey}`);
 }
 
-<<<<<<< HEAD
 // ── Payments (Flutterwave) ────────────────────────────────────────────────────
 
 export type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
@@ -411,9 +410,20 @@ export function verifyPayment(
   });
 }
 
+export function cancelPayment(token: string, input: { txRef: string }) {
+  return apiFetch<Payment>("/payments/cancel", {
+    method: "POST",
+    headers: authHeader(token),
+    body: JSON.stringify(input),
+  });
+}
+
 export function fetchPaymentHistory(token: string) {
   return apiFetch<Payment[]>("/payments/history", {
-=======
+    headers: authHeader(token),
+  });
+}
+
 export function fetchAllNeighbourhoods() {
   return apiFetch<NeighbourhoodData[]>("/neighbourhood");
 }
@@ -523,7 +533,6 @@ export function markNotificationRead(id: string, token: string) {
 export function markAllNotificationsRead(token: string) {
   return apiFetch<{ success: boolean }>("/notifications/read-all", {
     method: "PATCH",
->>>>>>> 963936cdb9e338b36d54b7f7878ebfe5f3f99332
     headers: authHeader(token),
   });
 }

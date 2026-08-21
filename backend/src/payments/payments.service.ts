@@ -7,13 +7,20 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { FlutterwaveService } from './flutterwave.service.js';
+import {
+  FlutterwaveService,
+  type FlutterwaveInitResponse,
+} from './flutterwave.service.js';
 import type { SafeUser } from '../common/constants/safe-user.constant.js';
 
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
   private readonly frontendUrl: string;
+  private readonly paymentInclude = {
+    membership: { include: { cooperative: true } },
+    contribution: true,
+  } as const;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -54,22 +61,31 @@ export class PaymentsService {
     });
 
     // Call Flutterwave to get checkout URL
-    const flwResponse = await this.flutterwave.initializePayment({
-      tx_ref: txRef,
-      amount,
-      currency: 'NGN',
-      redirect_url: `${this.frontendUrl}/dashboard/payments/callback`,
-      customer: {
-        email: user.email,
-        name: user.name,
-        phonenumber: user.phone ?? undefined,
-      },
-      customizations: {
-        title: 'HomePath Savings',
-        description: `Monthly contribution to ${membership.cooperative.name}`,
-      },
-      payment_options: 'card,banktransfer,ussd',
-    });
+    let flwResponse: FlutterwaveInitResponse;
+    try {
+      flwResponse = await this.flutterwave.initializePayment({
+        tx_ref: txRef,
+        amount,
+        currency: 'NGN',
+        redirect_url: `${this.frontendUrl}/dashboard/payments/callback`,
+        customer: {
+          email: user.email,
+          name: user.name,
+          phonenumber: user.phone ?? undefined,
+        },
+        customizations: {
+          title: 'HomePath Savings',
+          description: `Monthly contribution to ${membership.cooperative.name}`,
+        },
+        payment_options: 'card,banktransfer,ussd',
+      });
+    } catch (error) {
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: 'FAILED' },
+      });
+      throw error;
+    }
 
     // Update payment record with checkout URL
     await this.prisma.payment.update({
@@ -84,20 +100,29 @@ export class PaymentsService {
     };
   }
 
-  async verifyAndFulfill(transactionId: string, txRef: string) {
+  async verifyAndFulfill(transactionId: string, txRef: string, userId?: string) {
     // Find the payment record
     const payment = await this.prisma.payment.findUnique({
       where: { txRef },
-      include: { membership: { include: { cooperative: true } } },
+      include: this.paymentInclude,
     });
 
     if (!payment) {
       throw new NotFoundException('Payment not found for this transaction reference');
     }
+    if (userId && payment.userId !== userId) {
+      throw new ForbiddenException('You can only verify your own payments');
+    }
 
     // Already processed
     if (payment.status === 'SUCCESS') {
       return payment;
+    }
+    if (payment.status === 'CANCELLED') {
+      throw new BadRequestException('This payment has already been cancelled');
+    }
+    if (payment.status === 'FAILED') {
+      throw new BadRequestException('This payment has already failed');
     }
 
     // Verify with Flutterwave
@@ -107,11 +132,12 @@ export class PaymentsService {
     // Validate the transaction
     if (
       txData.status !== 'successful' ||
+      txData.tx_ref !== txRef ||
       txData.amount < Number(payment.amount) ||
       txData.currency !== payment.currency
     ) {
-      await this.prisma.payment.update({
-        where: { id: payment.id },
+      await this.prisma.payment.updateMany({
+        where: { id: payment.id, status: 'PENDING' },
         data: {
           status: 'FAILED',
           providerTxId: String(txData.id),
@@ -127,6 +153,23 @@ export class PaymentsService {
     const contributionMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const result = await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.payment.updateMany({
+        where: { id: payment.id, status: 'PENDING' },
+        data: {
+          status: 'SUCCESS',
+          providerTxId: String(txData.id),
+        },
+      });
+
+      if (claimed.count === 0) {
+        const existing = await tx.payment.findUnique({
+          where: { id: payment.id },
+          include: this.paymentInclude,
+        });
+        if (!existing) throw new NotFoundException('Payment not found');
+        return existing;
+      }
+
       const contribution = await tx.contribution.create({
         data: {
           membershipId: payment.membershipId,
@@ -139,13 +182,9 @@ export class PaymentsService {
         where: { id: payment.id },
         data: {
           status: 'SUCCESS',
-          providerTxId: String(txData.id),
           contributionId: contribution.id,
         },
-        include: {
-          membership: { include: { cooperative: true } },
-          contribution: true,
-        },
+        include: this.paymentInclude,
       });
 
       return updatedPayment;
@@ -173,7 +212,8 @@ export class PaymentsService {
       try {
         await this.verifyAndFulfill(transactionId, txRef);
       } catch (error) {
-        this.logger.error(`Webhook fulfillment failed for tx_ref=${txRef}`, error);
+        const stack = error instanceof Error ? error.stack : String(error);
+        this.logger.error(`Webhook fulfillment failed for tx_ref=${txRef}`, stack);
       }
     }
   }
@@ -181,11 +221,31 @@ export class PaymentsService {
   async findUserPayments(userId: string) {
     return this.prisma.payment.findMany({
       where: { userId },
-      include: {
-        membership: { include: { cooperative: true } },
-        contribution: true,
-      },
+      include: this.paymentInclude,
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async cancelPayment(userId: string, txRef: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { txRef },
+      include: this.paymentInclude,
+    });
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found for this transaction reference');
+    }
+    if (payment.userId !== userId) {
+      throw new ForbiddenException('You can only cancel your own payments');
+    }
+    if (payment.status !== 'PENDING') {
+      return payment;
+    }
+
+    return this.prisma.payment.update({
+      where: { id: payment.id },
+      data: { status: 'CANCELLED' },
+      include: this.paymentInclude,
     });
   }
 }
