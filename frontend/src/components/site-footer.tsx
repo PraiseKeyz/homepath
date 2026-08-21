@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const PRODUCT_LINKS = [
@@ -47,14 +48,14 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-6 py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-base font-bold text-text-primary-900"
-            >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-button-primary-default text-sm text-text-primary-on-brand">
-                H
-              </span>
-              HomePath
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/homepath-logo-white.png"
+                alt="HomePath"
+                width={492}
+                height={132}
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="mt-3 max-w-xs text-sm text-text-tertiary-600">
               Verified land, cooperative savings, and demand-matched developers

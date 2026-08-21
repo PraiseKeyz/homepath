@@ -159,7 +159,7 @@ export function LandlordCard({
     <div className="rounded-2xl border border-border-secondary bg-background-bg-primary p-6">
       <div className="flex items-center gap-4">
         <div className="relative">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-button-primary-default text-2xl font-black text-text-primary-on-brand">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-button-primary-default text-2xl font-black text-button-primary-fg">
             {getInitials(name)}
           </div>
           <span className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-utility-success-500 ring-2 ring-background-bg-primary">

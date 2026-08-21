@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./design-tokens-light.css";
+@import "./design-tokens.css";
 
 /* ==========================================================================
    FONTS – Satoshi (public/fonts/)
@@ -45,9 +45,9 @@
 }
 
 /* ==========================================================================
-   HOMEPATH DESIGN SYSTEM – Colors (deep violet palette, light theme only)
+   HOMEPATH DESIGN SYSTEM – Colors (monochrome dark theme, the app's only theme)
    Short names: e.g. --color-text-primary-900. Use: bg-button-primary-default, text-text-primary-900
-   All colors: design-tokens-light.css.
+   All colors: design-tokens.css.
    ========================================================================== */
 
 @theme inline {
@@ -147,6 +147,8 @@
   --color-button-primary-default: var(--color-button-primary-default);
   --color-button-primary-hover: var(--color-button-primary-hover);
   --color-button-primary-focused: var(--color-button-primary-focused);
+  --color-button-primary-fg: var(--color-button-primary-fg);
+  --color-button-primary-fg-hover: var(--color-button-primary-fg-hover);
   --color-background-bg-primary: var(--color-background-bg-primary);
   --color-background-bg-primary-alt: var(--color-background-bg-primary-alt);
   --color-background-bg-primary-hover: var(--color-background-bg-primary-hover);
@@ -343,7 +345,7 @@
     0 20px 24px -4px var(--color-effects-shadows-shadow-xl-01);
 }
 
-/* Light theme only — no dark mode. */
+/* Dark theme only — the app's single theme, no light mode. */
 
 html {
   scroll-behavior: smooth;

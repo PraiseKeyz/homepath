@@ -1,6 +1,7 @@
 "use client";
 
 import { LayoutDashboard } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -37,14 +38,15 @@ export function SiteHeader() {
   return (
     <header className="sticky top-4 z-30 mx-auto max-w-6xl px-6">
       <div className="flex items-center justify-between rounded-full border border-border-secondary bg-background-bg-primary/90 py-3 pr-3 pl-6 shadow-dropdown-panel backdrop-blur">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-base font-bold text-text-primary-900"
-        >
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-button-primary-default text-sm text-text-primary-on-brand">
-            H
-          </span>
-          HomePath
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/homepath-logo-white.png"
+            alt="HomePath"
+            width={492}
+            height={132}
+            className="h-8 w-auto"
+            priority
+          />
         </Link>
 
         <nav className="hidden items-center gap-9 md:flex">

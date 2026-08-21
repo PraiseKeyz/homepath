@@ -47,7 +47,7 @@ export function JourneySection() {
       <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {STEPS.map((item) => (
           <li key={item.step} className="flex gap-4">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-button-primary-default text-sm font-bold text-text-primary-on-brand">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-button-primary-default text-sm font-bold text-button-primary-fg">
               {item.step}
             </span>
             <div>

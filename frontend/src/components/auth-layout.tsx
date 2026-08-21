@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { type ReactNode, useEffect, useState } from "react";
 
@@ -54,6 +55,15 @@ function AuthPromoPanel() {
     <div className="hidden min-h-screen flex-1 items-stretch p-4 lg:flex">
       <div className="flex flex-1 flex-col items-center justify-center rounded-[20px] bg-background-bg-brand-section px-8 py-16">
         <div className="flex max-w-[420px] flex-col items-center gap-8 text-center">
+          <Image
+            src="/homepath-logo-white.png"
+            alt="HomePath"
+            width={492}
+            height={132}
+            className="h-10 w-auto"
+            priority
+          />
+
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl leading-8 font-bold text-text-primary-on-brand">
               {slide.title}
@@ -119,14 +129,14 @@ export function AuthLayout({
   return (
     <div className="relative flex min-h-screen bg-background-bg-primary">
       <section className="relative flex min-h-screen min-w-[min(100%,480px)] flex-1 flex-col">
-        <Link
-          href="/"
-          className="absolute top-8 left-8 flex items-center gap-2 text-base font-bold text-text-primary-900"
-        >
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-button-primary-default text-sm text-text-primary-on-brand">
-            H
-          </span>
-          HomePath
+        <Link href="/" className="absolute top-8 left-8 flex items-center">
+          <Image
+            src="/homepath-logo-white.png"
+            alt="HomePath"
+            width={492}
+            height={132}
+            className="h-8 w-auto"
+          />
         </Link>
 
         <div className="flex flex-1 items-center justify-center px-8 py-24">

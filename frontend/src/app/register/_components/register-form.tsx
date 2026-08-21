@@ -49,7 +49,7 @@ export function RegisterForm() {
         role,
       });
       setSession(accessToken, user);
-      router.push("/dashboard/cooperative");
+      router.push("/dashboard");
       router.refresh();
     } catch (err) {
       setError(

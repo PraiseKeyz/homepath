@@ -41,7 +41,7 @@ export function PropertyCard({
           className={`absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wide uppercase ${
             property.listingType === "RENT"
               ? "bg-utility-success-500 text-text-white"
-              : "bg-button-primary-default text-text-primary-on-brand"
+              : "bg-button-primary-default text-button-primary-fg"
           }`}
         >
           {property.listingType === "RENT" ? "For Rent" : "For Sale"}

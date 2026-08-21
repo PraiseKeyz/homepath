@@ -115,7 +115,7 @@ export function PropertyBrowser() {
               onClick={() => setShowSaved((v) => !v)}
               className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 showSaved
-                  ? "bg-button-primary-default text-text-primary-on-brand"
+                  ? "bg-button-primary-default text-button-primary-fg"
                   : "bg-background-bg-secondary text-text-secondary-700 hover:bg-background-bg-secondary-hover"
               }`}
             >
@@ -147,7 +147,7 @@ export function PropertyBrowser() {
               onClick={() => setFilterType(type)}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 filterType === type
-                  ? "bg-button-primary-default text-text-primary-on-brand"
+                  ? "bg-button-primary-default text-button-primary-fg"
                   : "bg-background-bg-primary text-text-secondary-700 hover:bg-background-bg-secondary-hover"
               }`}
             >
@@ -182,7 +182,7 @@ export function PropertyBrowser() {
               onClick={() => setView(key)}
               className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors ${
                 view === key
-                  ? "bg-button-primary-default text-text-primary-on-brand"
+                  ? "bg-button-primary-default text-button-primary-fg"
                   : "bg-background-bg-primary text-text-secondary-700 hover:bg-background-bg-secondary-hover"
               }`}
             >

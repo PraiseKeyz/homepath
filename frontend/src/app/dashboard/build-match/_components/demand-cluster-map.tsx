@@ -7,7 +7,7 @@ import type { DemandCluster, Property } from "@/lib/api";
 import { formatAreaKey } from "@/lib/format";
 
 const LAGOS_CENTER: [number, number] = [6.5244, 3.3792];
-const BRAND_COLOR = "#5b21b6";
+const BRAND_COLOR = "#252b37";
 
 function areaCentroid(
   areaKey: string,

@@ -23,7 +23,7 @@ export function LoginForm() {
     try {
       const { user, accessToken } = await login({ email, password });
       setSession(accessToken, user);
-      router.push("/dashboard/cooperative");
+      router.push("/dashboard");
       router.refresh();
     } catch (err) {
       setError(

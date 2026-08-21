@@ -132,7 +132,7 @@ export function PropertyDetailView({ propertyId }: { propertyId: string }) {
                   className={`rounded-full px-3 py-1 text-xs font-bold tracking-widest uppercase ${
                     property.listingType === "RENT"
                       ? "bg-utility-success-500 text-text-white"
-                      : "bg-button-primary-default text-text-primary-on-brand"
+                      : "bg-button-primary-default text-button-primary-fg"
                   }`}
                 >
                   {property.listingType === "RENT" ? "For rent" : "For sale"}
@@ -310,7 +310,7 @@ export function PropertyDetailView({ propertyId }: { propertyId: string }) {
                   className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold transition-colors ${
                     isSaved
                       ? "bg-background-bg-error-primary text-utility-error-600 ring-1 ring-border-error"
-                      : "bg-button-primary-default text-text-primary-on-brand hover:bg-button-primary-hover"
+                      : "bg-button-primary-default text-button-primary-fg hover:bg-button-primary-hover"
                   }`}
                 >
                   {isSaved ? (
